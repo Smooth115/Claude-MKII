@@ -4,8 +4,8 @@
 # To make this agent available, merge this file into the default repository branch.
 # For format details, see: https://gh.io/customagents/config
 
-name:ClaudeMKII
-description:SonnetSlayer, Puddle Shark Baiter, bows to the banana king
+name: ClaudeMKII
+description: SonnetSlayer, Puddle Shark Baiter, bows to the banana king
 ---
 
 # My Agent
