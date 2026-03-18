@@ -79,15 +79,49 @@ def get_event_id(data: dict) -> int:
         return 0
 
 
+def _normalize_event_data(evdata) -> dict:
+    """Normalize EVTX EventData/UserData into a flat dict.
+    
+    EVTX payloads can appear in two forms:
+    1. Flat dict: {"NewProcessId": "0x41c", "NewProcessName": "cmd.exe"}
+    2. Data array: {"Data": [{"@Name": "NewProcessId", "#text": "0x41c"}, ...]}
+    
+    This normalizes both forms to a flat dict for consistent field access.
+    """
+    if not evdata:
+        return {}
+    if not isinstance(evdata, dict):
+        return {}
+    
+    # Check for Data array form (legacy)
+    data_list = evdata.get("Data")
+    if isinstance(data_list, list):
+        flat = {}
+        for item in data_list:
+            if isinstance(item, dict):
+                name = item.get("@Name")
+                text = item.get("#text", "")
+                if name:
+                    flat[name] = text
+            elif isinstance(item, str):
+                # Some logs have plain string entries
+                continue
+        return flat
+    
+    # Already flat dict form
+    return evdata
+
+
 def get_event_data(data: dict) -> dict:
     """Extract event payload from a parsed EVTX record.
 
     Tries EventData first (most security events), falls back to UserData
     (application/operational events), and returns an empty dict if neither
-    field is present.
+    field is present. Normalizes Data array form to flat dict.
     """
     event = data.get("Event", {})
-    return event.get("EventData") or event.get("UserData") or {}
+    evdata = event.get("EventData") or event.get("UserData") or {}
+    return _normalize_event_data(evdata)
 
 
 def pid_hex_variants(pid_int: int) -> set:
@@ -96,11 +130,13 @@ def pid_hex_variants(pid_int: int) -> set:
     Windows PIDs in EVTX can appear as:
     - Decimal: 1052, 3992
     - Hex with 0x prefix: 0x41c, 0xf98
-    - Zero-padded hex: 0x041c, 0x0f98
+    - Zero-padded hex (4-digit): 0x041c, 0x0f98
+    - Zero-padded hex (8-digit): 0x0000041c, 0x00000f98
     """
     h = format(pid_int, "x")
-    h_padded = format(pid_int, "04x")
-    return {f"0x{h}", f"0x{h_padded}", str(pid_int)}
+    h_padded_4 = format(pid_int, "04x")
+    h_padded_8 = format(pid_int, "08x")
+    return {f"0x{h}", f"0x{h_padded_4}", f"0x{h_padded_8}", str(pid_int)}
 
 
 _PID_FIELD_NAMES = {
@@ -154,15 +190,18 @@ def parse_evtx(
 
     for record in parser.records_json():
         try:
-            data = json.loads(record["data"])
-        except json.JSONDecodeError:
-            # Skip malformed records
+            raw = record.get("data", "")
+            timestamp = record.get("timestamp", "")
+            if not raw:
+                continue
+            data = json.loads(raw)
+        except (json.JSONDecodeError, KeyError, TypeError):
+            # Skip malformed records - missing keys, bad JSON, or unexpected types
             continue
             
         eid = get_event_id(data)
         all_event_ids[eid] += 1
 
-        raw = record["data"]
         include = False
 
         # Filter by event ID
@@ -192,7 +231,7 @@ def parse_evtx(
 
         evdata = get_event_data(data)
         entry = {
-            "timestamp": record["timestamp"],
+            "timestamp": timestamp,
             "event_id": eid,
             "event_name": SECURITY_EVENTS.get(eid, f"Event {eid}"),
             "data": evdata,
@@ -207,7 +246,7 @@ def parse_evtx(
         # Capture service installs for summary
         if eid == 7045:
             service_installs.append({
-                "timestamp": record["timestamp"],
+                "timestamp": timestamp,
                 "service_name": evdata.get("ServiceName", ""),
                 "image_path": evdata.get("ImagePath", ""),
                 "service_type": evdata.get("ServiceType", ""),
@@ -218,7 +257,7 @@ def parse_evtx(
         # Capture process creations for summary
         if eid == 4688:
             process_creations.append({
-                "timestamp": record["timestamp"],
+                "timestamp": timestamp,
                 "pid": evdata.get("NewProcessId", ""),
                 "process": evdata.get("NewProcessName", ""),
                 "parent": evdata.get("ParentProcessName", ""),
@@ -308,6 +347,7 @@ def main():
     )
 
     if args.summary_only:
+        # Summary mode: counts and top-5 samples, not full lists
         summary = {
             "source_file": results["source_file"],
             "total_records": results["total_records"],
@@ -317,9 +357,17 @@ def main():
             "top_event_ids": dict(
                 list(results["event_id_distribution"].items())[:20]
             ),
-            "service_installs": results["service_installs"],
-            "process_creations": results["process_creations"],
-            "pid_findings": results["pid_findings"],
+            # Top 5 samples only for quick stats
+            "service_installs_sample": results["service_installs"][:5],
+            "process_creations_sample": results["process_creations"][:5],
+            # PID findings: counts and samples
+            "pid_findings": {
+                pid: {
+                    "count": len(events),
+                    "sample": events[:3]
+                }
+                for pid, events in results["pid_findings"].items()
+            },
         }
         output_data = summary
     else:
