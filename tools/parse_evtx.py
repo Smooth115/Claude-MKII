@@ -104,7 +104,8 @@ def _normalize_event_data(evdata) -> dict:
                 if name:
                     flat[name] = text
             elif isinstance(item, str):
-                # Some logs have plain string entries
+                # Skip plain string Data entries (occurs in some telemetry/diagnostic events
+                # where the full payload is a single string, not structured key-value pairs)
                 continue
         return flat
     

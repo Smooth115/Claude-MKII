@@ -73,7 +73,7 @@ jobs:
           
           # Validate search - alphanumeric, spaces, underscores, dashes, dots only
           # This prevents flag injection (e.g., --all) and shell escapes
-          if [[ -n "$SEARCH" ]] && [[ ! "$SEARCH" =~ ^[a-zA-Z0-9_.\ -]+$ ]]; then
+          if [[ -n "$SEARCH" ]] && [[ ! "$SEARCH" =~ ^[a-zA-Z0-9_. -]+$ ]]; then
             echo "ERROR: Invalid search - must be alphanumeric with spaces, underscores, dashes, dots only"
             exit 1
           fi
