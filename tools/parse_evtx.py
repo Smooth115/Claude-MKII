@@ -91,9 +91,16 @@ def get_event_data(data: dict) -> dict:
 
 
 def pid_hex_variants(pid_int: int) -> set:
-    """Return hex and decimal variants of a PID for exact field matching."""
+    """Return hex and decimal variants of a PID for exact field matching.
+    
+    Windows PIDs in EVTX can appear as:
+    - Decimal: 1052, 3992
+    - Hex with 0x prefix: 0x41c, 0xf98
+    - Zero-padded hex: 0x041c, 0x0f98
+    """
     h = format(pid_int, "x")
-    return {f"0x{h}", str(pid_int)}
+    h_padded = format(pid_int, "04x")
+    return {f"0x{h}", f"0x{h_padded}", str(pid_int)}
 
 
 _PID_FIELD_NAMES = {
@@ -146,7 +153,12 @@ def parse_evtx(
     parser = PyEvtxParser(filepath)
 
     for record in parser.records_json():
-        data = json.loads(record["data"])
+        try:
+            data = json.loads(record["data"])
+        except json.JSONDecodeError:
+            # Skip malformed records
+            continue
+            
         eid = get_event_id(data)
         all_event_ids[eid] += 1
 
