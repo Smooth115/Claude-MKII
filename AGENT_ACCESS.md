@@ -141,3 +141,15 @@ Created by: Copilot (chat session with Smooth511)
 Updated by: ClaudeMKII (Opus)  
 Authorized by: Smooth511  
 Purpose: Prevent unauthorized agent access to ClaudeMKII core repository
+
+---
+
+## SYNC REQUIREMENTS
+
+The following identifiers MUST be kept in sync across files:
+
+| Identifier | This file | copilot-instructions.md |
+|------------|-----------|------------------------|
+| ClaudeMKII Seed | Line 42 (Authorization table) | Line 36 (IDENTIFIER) |
+
+If the seed changes, BOTH files must be updated. This is intentional - the seed acts as a verification chain.
