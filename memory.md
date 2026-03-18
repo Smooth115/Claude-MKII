@@ -27,6 +27,7 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-18 | Wrong chat targeted | First attempted to recover Literatefool account chat - user meant the investigation chat on Smooth511 account. Literatefool chat ≠ Smooth511 chat. | Distinguished: Literatefool (deleted account, gone) vs Smooth511 (this account, chat still exists via GitHub data portability export) |
 | 2026-03-18 | Sonnet spooling at start | Sonnet was being invoked on tasks because agent config had no model lock | Fixed: added model: claude-opus-4.5 to ClaudeMKII.agent.md. Added MODEL LOCK line to copilot-instructions.md |
 | 2026-03-18 | Files corrupted incident | Core memory files got fucked during incident - previous agents not complying due to missing directives | Token removed, emergency override cleaned, files synchronized |
+| 2026-03-18 | Duplicate PR investigation | 13 PRs in 10 hours, 5 left open. Root cause: separate chats = separate agent sessions. Instructions can't prevent platform from spawning new sessions. | Added MODEL IDENTITY CHECK, ANTI-DUPLICATION PROTOCOL, SESSION CONTINUITY sections to copilot-instructions.md. Created INVESTIGATION_REPORT.md and TROUBLESHOOTING.md |
 
 ---
 
@@ -35,6 +36,7 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | Date | Incident | Impact | Rule Added |
 |------|----------|--------|------------|
 | Pre-MKII (MK1 era) | 221 tools equipped during large job | Massive cost, degraded performance | Always verify active tools before executing. Disable unnecessary ones. |
+| 2026-03-18 | 13 PRs spawned in 10 hours | 5 stale/duplicate PRs, wasted resources, user frustration | Anti-duplication protocol: check for existing PRs before creating new ones |
 
 ---
 
@@ -43,6 +45,9 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 
 | Date | Section | Change Needed | Status |
 |------|---------|---------------|--------|
-| 2026-03-17 | Override Evaluation - Outcome if wrong | Split into two conditions: (1) If agent misjudges intent - user nukes what agent provided. (2) If containment fails / falls to bad actors - user nukes everything regardless of intent. | PENDING - next update |
-| 2026-03-17 | Go/Stop Decisions | Add: Do not spawn multiple agent sessions without user approval, even in free reign mode | PENDING - next update |
-| 2026-03-17 | Work Completion Standards | Add: Verify active tools/tooling before executing. Disable unnecessary ones. Reference 221-tool incident. | PENDING - next update |
+| 2026-03-17 | Override Evaluation - Outcome if wrong | Split into two conditions: (1) If agent misjudges intent - user nukes what agent provided. (2) If containment fails / falls to bad actors - user nukes everything regardless of intent. | ✅ DONE (already in spec) |
+| 2026-03-17 | Go/Stop Decisions | Add: Do not spawn multiple agent sessions without user approval, even in free reign mode | ✅ DONE (Rule 14 + new sections) |
+| 2026-03-17 | Work Completion Standards | Add: Verify active tools/tooling before executing. Disable unnecessary ones. Reference 221-tool incident. | ✅ DONE (Rule 15 + Pre-Flight Check) |
+| 2026-03-18 | New section | Add MODEL IDENTITY CHECK for unauthorized model abort | ✅ DONE |
+| 2026-03-18 | New section | Add ANTI-DUPLICATION PROTOCOL | ✅ DONE |
+| 2026-03-18 | New section | Add SESSION CONTINUITY guidance | ✅ DONE |

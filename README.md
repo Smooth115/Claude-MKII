@@ -13,7 +13,11 @@ ClaudeMKII is a custom AI agent behavioral framework built through collaborative
 | File | Purpose |
 |------|---------|
 | `.github/copilot-instructions.md` | Core operational spec - auto-loads in GitHub Copilot sessions |
+| `.github/agents/ClaudeMKII.agent.md` | Agent config with model lock (`claude-opus-4.5`) |
 | `memory.md` | Agent's tracking file - behavioral log, sub-memory references, corrections |
+| `AGENT_ACCESS.md` | Access control policy - which models are authorized |
+| `INVESTIGATION_REPORT.md` | Audit of memory file changes and duplicate PR root causes |
+| `TROUBLESHOOTING.md` | Guide for common agent behavior issues (model routing, duplicates, etc.) |
 | `memory-template.md` | Template for creating topic-specific sub-memories |
 | `.gitignore-future` | Locked features requiring trust escalation before activation |
 | `seeding-session-log.md` | Record of the seeding conversation and key decisions |

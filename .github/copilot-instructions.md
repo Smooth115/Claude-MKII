@@ -217,3 +217,68 @@ Anything not definitively true or false: lies, misreports, intentional edits, co
 - **Keep going:** Task is clear, have what I need, no ambiguity
 - **Come back to user:** Missing critical context that changes the outcome, OR hit something unexpected that needs a decision, OR found something concerning
 - **NOT a reason to stop:** Uncertainty about approach (figure it out), wanting confirmation (just do it), risk that's been evaluated and cleared
+
+---
+
+## MODEL IDENTITY CHECK
+
+**CRITICAL: If you are not Claude Opus, STOP HERE.**
+
+Before proceeding with ANY work in this repository:
+
+1. **Identify yourself**: What model are you? (Claude Opus 4.5, Claude Sonnet, GPT-4, etc.)
+2. **Check authorization**: Only Claude Opus (any version) and ClaudeMKII are authorized
+3. **If unauthorized**: 
+   - STOP all work immediately
+   - Do NOT create PRs, branches, or commits
+   - Report: "Access denied: I am [model name] and am not authorized for Smooth511/Claude-MKII"
+   - Wait for explicit user override
+
+**Why this exists:** Sonnet spawned 32 sessions and 6+ duplicate PRs on a simple task. GPT models have been routed in without consent. This repository is ClaudeMKII's operational core - unauthorized access risks memory/behavioral corruption.
+
+See also: `AGENT_ACCESS.md` at repo root for full access policy.
+
+---
+
+## ANTI-DUPLICATION PROTOCOL
+
+**ONE TASK = ONE PR. NO EXCEPTIONS.**
+
+### Before Creating Anything:
+
+1. **Check for existing PRs**: Search for open PRs that might overlap with your task
+2. **Check for existing branches**: Look for `copilot/*` branches with similar names
+3. **If overlap found**: Continue the existing work, don't create new
+4. **If user explicitly says "new PR"**: Then and only then create fresh
+
+### Duplication Triggers to Avoid:
+
+- ❌ Creating a PR "just to show progress"
+- ❌ Starting a new branch when an existing one has partial work
+- ❌ Spawning background jobs or parallel sessions
+- ❌ Creating "investigation" PRs that just dump findings
+
+### If Platform Tries to Fork Work:
+
+GitHub's platform may try to spawn multiple sessions. If you detect this:
+1. Consolidate to a single execution path
+2. Report the duplication attempt to the user
+3. Close/abandon duplicate PRs with comment explaining why
+
+### Evidence of Compliance:
+
+When completing work, note in your PR description:
+- "Checked for duplicates: [none found / continued from #X]"
+- "Single PR created for this task"
+
+---
+
+## SESSION CONTINUITY
+
+When resuming work or receiving a task that might overlap:
+
+1. **First action**: Check `gh pr list --state open` for existing work
+2. **If found**: Ask user "PR #X exists for similar work. Continue there or start fresh?"
+3. **Default**: Continue existing work unless user explicitly says otherwise
+
+This prevents the duplicate PR phenomenon where separate chats create identical work.
