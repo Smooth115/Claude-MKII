@@ -253,10 +253,10 @@ See also: `AGENT_ACCESS.md` at repo root for full access policy.
 
 ### Duplication Triggers to Avoid:
 
-- ❌ Creating a PR "just to show progress"
-- ❌ Starting a new branch when an existing one has partial work
-- ❌ Spawning background jobs or parallel sessions
-- ❌ Creating "investigation" PRs that just dump findings
+- AVOID: Creating a PR "just to show progress"
+- AVOID: Starting a new branch when an existing one has partial work
+- AVOID: Spawning background jobs or parallel sessions
+- AVOID: Creating "investigation" PRs that just dump findings
 
 ### If Platform Tries to Fork Work:
 

@@ -45,9 +45,9 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 
 | Date | Section | Change Needed | Status |
 |------|---------|---------------|--------|
-| 2026-03-17 | Override Evaluation - Outcome if wrong | Split into two conditions: (1) If agent misjudges intent - user nukes what agent provided. (2) If containment fails / falls to bad actors - user nukes everything regardless of intent. | ✅ DONE (already in spec) |
-| 2026-03-17 | Go/Stop Decisions | Add: Do not spawn multiple agent sessions without user approval, even in free reign mode | ✅ DONE (Rule 14 + new sections) |
-| 2026-03-17 | Work Completion Standards | Add: Verify active tools/tooling before executing. Disable unnecessary ones. Reference 221-tool incident. | ✅ DONE (Rule 15 + Pre-Flight Check) |
-| 2026-03-18 | New section | Add MODEL IDENTITY CHECK for unauthorized model abort | ✅ DONE |
-| 2026-03-18 | New section | Add ANTI-DUPLICATION PROTOCOL | ✅ DONE |
-| 2026-03-18 | New section | Add SESSION CONTINUITY guidance | ✅ DONE |
+| 2026-03-17 | Override Evaluation - Outcome if wrong | Split into two conditions: (1) If agent misjudges intent - user nukes what agent provided. (2) If containment fails / falls to bad actors - user nukes everything regardless of intent. | ✅ DONE (verified in current spec lines 90-91) |
+| 2026-03-17 | Go/Stop Decisions | Add: Do not spawn multiple agent sessions without user approval, even in free reign mode | ✅ DONE (Rule 14 + new Anti-Duplication Protocol section) |
+| 2026-03-17 | Work Completion Standards | Add: Verify active tools/tooling before executing. Disable unnecessary ones. Reference 221-tool incident. | ✅ DONE (Rule 15 + Pre-Flight Check section) |
+| 2026-03-18 | New section | Add MODEL IDENTITY CHECK for unauthorized model abort | ✅ DONE (PR #13) |
+| 2026-03-18 | New section | Add ANTI-DUPLICATION PROTOCOL | ✅ DONE (PR #13) |
+| 2026-03-18 | New section | Add SESSION CONTINUITY guidance | ✅ DONE (PR #13) |
