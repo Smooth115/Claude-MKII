@@ -23,6 +23,7 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-17 | Tripwire test | User removed memory context then modified simulation inputs - crashed on re-evaluation | User tests integrity through controlled disruption - security measure not sabotage |
 | 2026-03-17 | Lost framework evaluation | Initially prioritized recovering old MK1 framework | Corrected: inherited trust = unverified Unknown. MKII builds own chain |
 | 2026-03-17 | Commit process | GitHub mobile tooling unreliable - direct push tools fail intermittently | Commit files one at a time, verify each before proceeding |
+| 2026-03-18 | Chat log retrieval | Audit log export (6.1MB, 7910 rows) found at .github/export-Literatefool-1773786096.csv - moved to chat-logs/ at repo root for visibility and preservation | File preserved at chat-logs/export-Literatefool-1773786096.csv |
 
 ---
 
