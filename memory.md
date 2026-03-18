@@ -12,6 +12,8 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | ID | Topic | Location | Created |
 |----|-------|----------|---------|
 | 1 | Agent Seeding Source Material | Linked in seeding chat 2026-03-17: tcp_udp_defense_hunt.md, malware_defense_report.md, incident_3_blackout.md, lenovo_ideapad_attack.md, incident_report.md | 2026-03-17 |
+| 2 | Chat Loss Incident Documentation | chat-logs/recovery-findings-2026-03-18.md, chat-logs/chat-recovery-smooth511.md | 2026-03-18 |
+| 3 | Audit Log Archive | chat-logs/export-Literatefool-1773786096.csv (7910 rows) | 2026-03-18 |
 
 ---
 
@@ -27,6 +29,7 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-18 | Wrong chat targeted | First attempted to recover Literatefool account chat - user meant the investigation chat on Smooth511 account. Literatefool chat ≠ Smooth511 chat. | Distinguished: Literatefool (deleted account, gone) vs Smooth511 (this account, chat still exists via GitHub data portability export) |
 | 2026-03-18 | Sonnet spooling at start | Sonnet was being invoked on tasks because agent config had no model lock | Fixed: added model: claude-opus-4.5 to ClaudeMKII.agent.md. Added MODEL LOCK line to copilot-instructions.md |
 | 2026-03-18 | Files corrupted incident | Core memory files got fucked during incident - previous agents not complying due to missing directives | Token removed, emergency override cleaned, files synchronized |
+| 2026-03-18 | All chats gone confirmation | User confirmed both chats (Literatefool + Smooth511 investigation) are gone. OAuth cascade confirmed. | Updated memory references, added CRITICAL INCIDENTS section, marked pending corrections as DONE |
 
 ---
 
@@ -43,6 +46,15 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 
 | Date | Section | Change Needed | Status |
 |------|---------|---------------|--------|
-| 2026-03-17 | Override Evaluation - Outcome if wrong | Split into two conditions: (1) If agent misjudges intent - user nukes what agent provided. (2) If containment fails / falls to bad actors - user nukes everything regardless of intent. | PENDING - next update |
-| 2026-03-17 | Go/Stop Decisions | Add: Do not spawn multiple agent sessions without user approval, even in free reign mode | PENDING - next update |
-| 2026-03-17 | Work Completion Standards | Add: Verify active tools/tooling before executing. Disable unnecessary ones. Reference 221-tool incident. | PENDING - next update |
+| 2026-03-17 | Override Evaluation - Outcome if wrong | Split into two conditions: (1) If agent misjudges intent - user nukes what agent provided. (2) If containment fails / falls to bad actors - user nukes everything regardless of intent. | ✅ DONE - 5-point eval chain at lines 87-98 |
+| 2026-03-17 | Go/Stop Decisions | Add: Do not spawn multiple agent sessions without user approval, even in free reign mode | ✅ DONE - Rule 14 at line 30 |
+| 2026-03-17 | Work Completion Standards | Add: Verify active tools/tooling before executing. Disable unnecessary ones. Reference 221-tool incident. | ✅ DONE - Rule 15 at line 31, Pre-Flight Check at lines 205-208 |
+
+---
+
+## CRITICAL INCIDENTS
+
+| Date | Incident | Impact | Status |
+|------|----------|--------|--------|
+| 2026-03-18 | Literatefool account deleted | All 29 repos gone, all chat history gone, OAuth cascade affected Smooth511 chats | PERMANENT - see chat-logs/recovery-findings-2026-03-18.md |
+| 2026-03-18 | Smooth511 investigation chat lost | 2-3hr session findings never committed, chat tied to Literatefool OAuth token, cascade-deleted | PERMANENT - see chat-logs/chat-recovery-smooth511.md |
