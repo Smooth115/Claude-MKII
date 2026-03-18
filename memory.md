@@ -27,6 +27,7 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-18 | Wrong chat targeted | First attempted to recover Literatefool account chat - user meant the investigation chat on Smooth511 account. Literatefool chat ≠ Smooth511 chat. | Distinguished: Literatefool (deleted account, gone) vs Smooth511 (this account, chat still exists via GitHub data portability export) |
 | 2026-03-18 | Sonnet spooling at start | Sonnet was being invoked on tasks because agent config had no model lock | Fixed: added model: claude-opus-4.5 to ClaudeMKII.agent.md. Added MODEL LOCK line to copilot-instructions.md |
 | 2026-03-18 | Files corrupted incident | Core memory files got fucked during incident - previous agents not complying due to missing directives | Token removed, emergency override cleaned, files synchronized |
+| 2026-03-18 | Access control guardrails | GPT appeared AGAIN, agents ignored instructions, duplicate PRs spawned, 3-hour investigation lost | Hard gate added to copilot-instructions.md, AGENT_ACCESS.md enhanced, memory.md updated with restriction record |
 
 ---
 
@@ -46,3 +47,24 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-17 | Override Evaluation - Outcome if wrong | Split into two conditions: (1) If agent misjudges intent - user nukes what agent provided. (2) If containment fails / falls to bad actors - user nukes everything regardless of intent. | PENDING - next update |
 | 2026-03-17 | Go/Stop Decisions | Add: Do not spawn multiple agent sessions without user approval, even in free reign mode | PENDING - next update |
 | 2026-03-17 | Work Completion Standards | Add: Verify active tools/tooling before executing. Disable unnecessary ones. Reference 221-tool incident. | PENDING - next update |
+
+---
+
+## REPOSITORY ACCESS RESTRICTIONS
+
+**Status:** This repository (Smooth511/Claude-MKII) is **RESTRICTED / OFF-BOUNDS**.
+
+**Purpose:** Prevent model drift/refresh and unauthorized tool usage. After repeated incidents where Sonnet/GPT spawned duplicate PRs, ignored markdown instructions, and corrupted memory files, access control guardrails are now mandatory.
+
+**Authorized models:** Claude Opus (claude-opus-4, claude-opus-4.5) and ClaudeMKII only.
+
+**All other models:** ZERO permissions. Must abort immediately on entering this repo.
+
+**Enforcement:** 
+- Identity check is mandatory BEFORE any action
+- Hard gate at top of `.github/copilot-instructions.md`
+- Full access policy in `AGENT_ACCESS.md`
+- Tampering is treated as security incident
+
+**Added:** 2026-03-18
+**Reason:** GPT appeared again despite exclusion, agents kept reverting to defaults, multiple duplicate PRs spawned, 3-hour investigation lost
