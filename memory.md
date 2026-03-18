@@ -26,6 +26,8 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-18 | Chat log retrieval | Audit log export (6.1MB, 7910 rows) found at .github/export-Literatefool-1773786096.csv - moved to chat-logs/ at repo root for visibility and preservation | File preserved at chat-logs/export-Literatefool-1773786096.csv |
 | 2026-03-18 | Wrong chat targeted | First attempted to recover Literatefool account chat - user meant the investigation chat on Smooth511 account. Literatefool chat ≠ Smooth511 chat. | Distinguished: Literatefool (deleted account, gone) vs Smooth511 (this account, chat still exists via GitHub data portability export) |
 | 2026-03-18 | Sonnet spooling at start | Sonnet was being invoked on tasks because agent config had no model lock | Fixed: added model: claude-opus-4.5 to ClaudeMKII.agent.md. Added MODEL LOCK line to copilot-instructions.md |
+| 2026-03-18 | EVTX parser built | User needed tool to parse Windows Event Logs (.evtx) from Mini-Tank-MKII. Built tools/parse_evtx.py (python-evtx library) + .github/workflows/parse-evtx.yml (manual trigger workflow) | Tools committed. Workflow inputs: evtx_path, hunt_pids, event_ids, summary_only. Artifact output as JSON. |
+| 2026-03-18 | Mini-Tank EVTX analysis | Parsed logs1sthour/All hourlysave.evtx (28,748 records). PIDs 1052 and 3992 NOT found in process creation events (4688) - process audit logging was not enabled when those network connections occurred. 35 service installs: all Intel/Realtek/MS/Bitdefender - CLEAN. | Analysis saved to logs1sthour/analysis.json. G-Core Labs IP (109.61.19.21:80) remains unresolved - process was gone before audit was active. |
 
 ---
 

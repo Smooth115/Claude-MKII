@@ -1,0 +1,126 @@
+name: Parse EVTX Event Log
+
+on:
+  workflow_dispatch:
+    inputs:
+      evtx_path:
+        description: 'Path to .evtx file in repository (e.g. logs1sthour/All hourlysave.evtx)'
+        required: true
+        default: 'logs1sthour/All hourlysave.evtx'
+      hunt_pids:
+        description: 'Space-separated PIDs to hunt for (e.g. 1052 3992)'
+        required: false
+        default: '1052 3992'
+      event_ids:
+        description: 'Space-separated event IDs to filter to (leave blank for all security events)'
+        required: false
+        default: ''
+      summary_only:
+        description: 'Output summary only instead of full event dump'
+        required: false
+        type: choice
+        default: 'false'
+        options:
+          - 'true'
+          - 'false'
+
+jobs:
+  parse-evtx:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install evtx library
+        run: pip install evtx
+
+      - name: Validate EVTX file exists
+        run: |
+          if [ ! -f "${{ github.event.inputs.evtx_path }}" ]; then
+            echo "ERROR: File not found: ${{ github.event.inputs.evtx_path }}"
+            echo "Available files in logs/:"
+            ls -la logs/ 2>/dev/null || echo "(logs/ directory empty or missing)"
+            echo "Available files in logs1sthour/:"
+            ls -la logs1sthour/ 2>/dev/null || echo "(logs1sthour/ directory empty or missing)"
+            exit 1
+          fi
+          echo "Found: ${{ github.event.inputs.evtx_path }}"
+          ls -lh "${{ github.event.inputs.evtx_path }}"
+
+      - name: Build parse command
+        id: build_cmd
+        run: |
+          CMD="python3 tools/parse_evtx.py \"${{ github.event.inputs.evtx_path }}\" output.json"
+
+          if [ -n "${{ github.event.inputs.hunt_pids }}" ]; then
+            CMD="$CMD --hunt-pids ${{ github.event.inputs.hunt_pids }}"
+          fi
+
+          if [ -n "${{ github.event.inputs.event_ids }}" ]; then
+            CMD="$CMD --event-ids ${{ github.event.inputs.event_ids }}"
+          fi
+
+          if [ "${{ github.event.inputs.summary_only }}" = "true" ]; then
+            CMD="$CMD --summary-only"
+          fi
+
+          echo "cmd=$CMD" >> "$GITHUB_OUTPUT"
+          echo "Running: $CMD"
+
+      - name: Run EVTX parser
+        run: ${{ steps.build_cmd.outputs.cmd }}
+
+      - name: Show summary
+        run: |
+          python3 -c "
+          import json, sys
+          try:
+              d = json.load(open('output.json'))
+              print('=== EVTX Parse Summary ===')
+              print(f'Source: {d.get(\"source_file\", \"unknown\")}')
+              print(f'Total records in file: {d.get(\"total_records\", 0):,}')
+              print(f'Matched events: {d.get(\"matched_events\", 0):,}')
+              
+              svc = d.get('service_installs', [])
+              procs = d.get('process_creations', [])
+              print(f'Service installs (7045): {len(svc)}')
+              print(f'Process creations (4688): {len(procs)}')
+              
+              pid_findings = d.get('pid_findings', {})
+              if pid_findings:
+                  print()
+                  print('=== PID Hunt Results ===')
+                  for pid, findings in pid_findings.items():
+                      if findings:
+                          print(f'PID {pid}: {len(findings)} events FOUND')
+                          for f in findings[:5]:
+                              print(f'  [{f[\"timestamp\"]}] EID={f[\"event_id\"]} ({f[\"event_name\"]})')
+                      else:
+                          print(f'PID {pid}: NOT FOUND in log (process audit may not have been enabled)')
+              
+              if svc:
+                  print()
+                  print('=== Service Installs ===')
+                  for s in svc:
+                      print(f'  [{s[\"timestamp\"]}] {s[\"service_name\"]}')
+                      print(f'    Path: {s[\"image_path\"]}')
+              
+          except Exception as e:
+              print(f'Error reading output: {e}', file=sys.stderr)
+              sys.exit(1)
+          "
+
+      - name: Upload parsed output as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: evtx-parsed-${{ github.run_number }}
+          path: output.json
+          retention-days: 30

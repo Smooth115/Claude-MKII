@@ -1,0 +1,26 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# EVTX parser outputs (large files - keep only summary JSONs, not full dumps)
+# Full output JSONs from parse_evtx.py - these can be huge, don't commit them
+# Exception: summary analysis files (analysis.json) are intentionally committed
+output.json
+*-full.json
+
+# OS
+.DS_Store
+Thumbs.db
+desktop.ini
