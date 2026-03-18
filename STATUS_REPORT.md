@@ -76,13 +76,13 @@
 
 ### What was lost
 
-A 2-3 hour investigation session ran on 2026-03-18. Literatefool was granted write access to this repo and the Copilot SWE Agent token was created during that session (audit log: event `1773785840611`). Per the problem statement, deleting the Literatefool account also destroyed the conversation — "It deleted the conversation here and nothing recorded." No findings were committed to Claude-MKII before the account was deleted.
+A 2-3 hour investigation session ran on 2026-03-18 **on the Smooth511 account** (this account). The Copilot agent ran under Smooth511. Literatefool's role was to generate a read-all token so the Smooth511 agent could access Literatefool's 22 private repos — Literatefool was the data source, not the chat host. No findings were committed to Claude-MKII before the session ended. Deleting the Literatefool account caused the Smooth511 Copilot chat from that session to also be deleted (GitHub chat sessions tied to cross-account token access are removed when the issuing account is deleted).
 
-**Note on account ambiguity:** `chat-logs/chat-recovery-smooth511.md` (written by a prior recovery agent) asserts the investigation chat ran under the Smooth511 account. The problem statement says deleting Literatefool destroyed the conversation. These conflict. The problem statement is the authoritative source. The prior agent's recovery instructions may point at the wrong account — treat Option 1 in that file as worth trying but not guaranteed.
+**`chat-logs/chat-recovery-smooth511.md` was correct** — the chat was on Smooth511. The previous agent that wrote this report wrongly cast doubt on that file. That note is retracted here.
 
 ### What deletion destroyed
 
-- All Copilot chat content tied to the Literatefool account (GitHub confirmed: chat data deleted with account)
+- The Smooth511 Copilot chat session containing all investigation findings (deleted as a cascade consequence of Literatefool account deletion)
 - All 29 Literatefool repos (all private, all gone)
 - All 7 AM-UI-Process org repos that were present at time of deletion
 
@@ -99,9 +99,9 @@ A 2-3 hour investigation session ran on 2026-03-18. Literatefool was granted wri
 
 ### Partial recovery options
 
-1. **Smooth511 data export** - The investigation chat ran on Smooth511 account, not Literatefool. GitHub data portability export from Smooth511's settings MAY include Copilot chat content depending on plan/settings. See `chat-logs/chat-recovery-smooth511.md` for instructions.
-2. **Browser cache** - If the same browser/device was used, Copilot chat session may be cached locally.
-3. **GitHub Support** - Can raise a request citing the session timestamp window (~1773785840611 to ~1773785963638).
+1. **Browser cache** - If the same device/browser was used for the Smooth511 Copilot session, local cache may still hold the chat content. Check Safari/Chrome on the same phone before clearing anything.
+2. **GitHub Support** - Raise a request citing the session timestamp window (~1773785840611 to ~1773785963638) and the cross-account token deletion cascade. GitHub may have server-side retention even after client-facing deletion.
+3. **Smooth511 data portability export** - A full account export via github.com/settings/account may include chat history, though audit logs confirmed they do not contain Copilot chat content. Worth checking.
 
 ---
 

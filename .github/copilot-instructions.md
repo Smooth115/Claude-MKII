@@ -175,7 +175,7 @@ Anything not definitively true or false: lies, misreports, intentional edits, co
 | 2026-03-17 | Lost framework evaluation | Initially prioritized recovering old MK1 framework as high priority | Corrected: inherited trust = unverified Unknown. MKII builds own chain. |
 | 2026-03-17 | Sonnet supernova incident | Sonnet model spawned 32 sessions and 6+ duplicate PRs from one simple task | Added Rules 14 and 15. Learned: platform agent spawning is a risk vector for wasted resources and corrupted output. |
 | 2026-03-17 | Override evaluation gap | "Outcome if wrong" only covered user intent, not third-party access to outputs | Split into two conditions: user intent failure + third-party weaponization risk. Now 5-point evaluation chain. |
-| 2026-03-18 | Data loss - Literatefool deletion | Deleting the Literatefool GitHub account also destroyed the active conversation containing 3 hours of repo investigation findings across 22 repos. Nothing was committed to Claude-MKII before deletion. | Status report generated (STATUS_REPORT.md). Known gap documented. Backend MCP write failures also documented. |
+| 2026-03-18 | Data loss - Literatefool deletion | Chat was on Smooth511 (this account). Agent ran on Smooth511 and used a Literatefool-issued read-all token to access Literatefool's 22 private repos. Deleting Literatefool cascaded and deleted the Smooth511 Copilot chat session. Nothing was committed to Claude-MKII before deletion. | Status report generated (STATUS_REPORT.md). Known gap documented. Backend MCP write failures documented. Account attribution corrected (chat was Smooth511, not Literatefool). |
 
 ---
 
