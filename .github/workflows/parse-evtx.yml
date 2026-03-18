@@ -1,0 +1,105 @@
+name: Parse EVTX Logs
+
+on:
+  workflow_dispatch:
+    inputs:
+      evtx_path:
+        description: 'Path to EVTX file in repo (e.g., logs1sthour/All hourlysave.evtx)'
+        required: true
+        default: 'logs1sthour/All hourlysave.evtx'
+      pids:
+        description: 'Comma-separated PIDs to search for (optional)'
+        required: false
+      event_ids:
+        description: 'Comma-separated event IDs to filter (default: security events)'
+        required: false
+      include_all:
+        description: 'Include all events, not just security-related'
+        required: false
+        default: 'false'
+
+permissions:
+  contents: read
+
+jobs:
+  parse-evtx:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r tools/requirements.txt
+
+      - name: Parse EVTX file
+        id: parse
+        env:
+          EVTX_PATH: ${{ inputs.evtx_path }}
+          PIDS: ${{ inputs.pids }}
+          EVENT_IDS: ${{ inputs.event_ids }}
+          INCLUDE_ALL: ${{ inputs.include_all }}
+        run: |
+          # Validate inputs
+          if [[ ! "$EVTX_PATH" =~ ^[a-zA-Z0-9_./-]+$ ]]; then
+            echo "ERROR: Invalid evtx_path - must be alphanumeric with / - _ . only"
+            exit 1
+          fi
+          
+          if [[ -n "$PIDS" ]] && [[ ! "$PIDS" =~ ^[0-9,]+$ ]]; then
+            echo "ERROR: Invalid pids - must be comma-separated numbers"
+            exit 1
+          fi
+          
+          if [[ -n "$EVENT_IDS" ]] && [[ ! "$EVENT_IDS" =~ ^[0-9,]+$ ]]; then
+            echo "ERROR: Invalid event_ids - must be comma-separated numbers"
+            exit 1
+          fi
+          
+          # Build command with safe argument passing
+          OUTPUT_NAME="parsed-$(date +%Y%m%d-%H%M%S).json"
+          
+          ARGS=("$EVTX_PATH" "logs/$OUTPUT_NAME")
+          
+          if [ -n "$PIDS" ]; then
+            ARGS+=("--pids" "$PIDS")
+          fi
+          
+          if [ -n "$EVENT_IDS" ]; then
+            ARGS+=("--ids" "$EVENT_IDS")
+          fi
+          
+          if [ "$INCLUDE_ALL" == "true" ]; then
+            ARGS+=("--all")
+          fi
+          
+          echo "Running parser with validated inputs"
+          python tools/parse_evtx.py "${ARGS[@]}"
+          
+          echo "output_file=logs/$OUTPUT_NAME" >> $GITHUB_OUTPUT
+
+      - name: Upload parsed output
+        uses: actions/upload-artifact@v4
+        with:
+          name: parsed-evtx
+          path: ${{ steps.parse.outputs.output_file }}
+          retention-days: 30
+
+      - name: Print summary
+        env:
+          EVTX_PATH: ${{ inputs.evtx_path }}
+        run: |
+          echo "## EVTX Parse Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Source:** $EVTX_PATH" >> $GITHUB_STEP_SUMMARY
+          echo "**Output:** ${{ steps.parse.outputs.output_file }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          
+          # Show event summary (safe - path already validated)
+          python tools/parse_evtx.py "$EVTX_PATH" --summary 2>/dev/null >> $GITHUB_STEP_SUMMARY || echo "Summary generation failed" >> $GITHUB_STEP_SUMMARY
