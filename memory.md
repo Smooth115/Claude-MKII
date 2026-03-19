@@ -12,6 +12,7 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | ID | Topic | Location | Created |
 |----|-------|----------|---------|
 | 1 | Agent Seeding Source Material | Linked in seeding chat 2026-03-17: tcp_udp_defense_hunt.md, malware_defense_report.md, incident_3_blackout.md, lenovo_ideapad_attack.md, incident_report.md | 2026-03-17 |
+| 2 | Registry UID Attack Evidence | evidence/registry-uid-attack-evidence.md | 2026-03-19 |
 
 ---
 
@@ -27,6 +28,7 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-18 | Wrong chat targeted | First attempted to recover Literatefool account chat - user meant the investigation chat on Smooth511 account. Literatefool chat ≠ Smooth511 chat. | Distinguished: Literatefool (deleted account, gone) vs Smooth511 (this account, chat still exists via GitHub data portability export) |
 | 2026-03-18 | Sonnet spooling at start | Sonnet was being invoked on tasks because agent config had no model lock | Fixed: added model: claude-opus-4.5 to ClaudeMKII.agent.md. Added MODEL LOCK line to copilot-instructions.md |
 | 2026-03-18 | Files corrupted incident | Core memory files got fucked during incident - previous agents not complying due to missing directives | Token removed, emergency override cleaned, files synchronized |
+| 2026-03-19 | Registry evidence documented | 54-second scrolling registry file confirms XML analysis findings - mass UID pattern attack with tracers 33554432, 50331648, 51150848 | Created evidence/registry-uid-attack-evidence.md |
 
 ---
 
