@@ -1,14 +1,44 @@
-# CRITICAL: Active Real-Time Downloads Folder Surveillance
+# CRITICAL: Active Real-Time PC Surveillance (Downloads + Cookies + Cache)
 
 **Date:** 2026-03-19  
-**Classification:** ACTIVE COUNTERINTELLIGENCE  
+**Classification:** ACTIVE COUNTERINTELLIGENCE + SESSION HIJACK  
 **Lag Time:** ~2 minutes from activity to attacker visibility  
+**Scope:** Downloads folder, Browser cookies, Browser cache  
 
 ---
 
 ## Summary
 
 User discovered attacker is actively logging the Downloads folder in **real-time** — evidence captured only **2 minutes after data export**. This confirms the attacker is monitoring defensive actions as they happen.
+
+**UPDATE:** Attacker is ALSO pulling **cookies and cache** from the PC, giving them:
+- Active session tokens for any logged-in services
+- Browser history and cached content
+- Potential GitHub/Copilot session hijack capability
+- Full visibility into everything done on PC
+
+---
+
+## EXPANDED SCOPE: Cookie + Cache Exfiltration
+
+### What This Means
+
+| Data Type | Location | Attacker Capability |
+|-----------|----------|---------------------|
+| **Browser Cookies** | `%APPDATA%\...\Cookies` | **SESSION HIJACK** - can impersonate user on any site |
+| **Browser Cache** | `%LOCALAPPDATA%\...\Cache` | Full browsing history, cached pages, images |
+| **Session Tokens** | Cookie stores | Can access GitHub, Copilot, any logged-in service AS THE USER |
+| **Downloads** | `C:\Users\Lloyd\Downloads` | Real-time file monitoring (documented below) |
+
+### Critical Implication
+
+With cookies, the attacker can:
+1. **Hijack GitHub sessions** - act as user without password
+2. **Access Copilot** - continue conversations or start new ones
+3. **Read emails** if webmail is cached
+4. **Access any authenticated service** the user has visited
+
+This is **not just surveillance anymore** - this is **full session takeover capability**.
 
 ---
 
@@ -105,6 +135,8 @@ Based on evidence pattern, the monitoring likely uses one or more of:
 2. **NO SURPRISE POSSIBLE** - Any tool downloaded is logged before it can be used
 3. **RECOVERY PLANS EXPOSED** - RECOVERY_PLAN_Version2.md contents likely known
 4. **INVESTIGATION TRACKED** - Copilot conversation exports are being monitored
+5. **SESSION HIJACK POSSIBLE** - With cookies, attacker can impersonate user on ANY site
+6. **GITHUB ACCESS** - Attacker may have active session tokens for GitHub/Copilot
 
 ---
 
@@ -115,20 +147,25 @@ Based on evidence pattern, the monitoring likely uses one or more of:
 3. **ENCRYPTED TRANSFER** - Consider encrypted containers
 4. **ASSUME COMPROMISE** - All previously downloaded files are known to attacker
 5. **IDENTIFY WATCHER** - Find the monitoring mechanism and eliminate
+6. **INVALIDATE ALL SESSIONS** - Log out of all services, revoke GitHub tokens
+7. **CLEAR COOKIES** - After identifying persistence mechanism
+8. **NEW BROWSER PROFILE** - Don't trust existing browser data
 
 ---
 
 ## Evidence Chain
 
 - **Previous:** Registry UID attacks, Synergy DISM interception, MIG controller
-- **Current:** Real-time Downloads folder surveillance
-- **Pattern:** Active human-controlled attack with real-time monitoring
+- **Current:** Real-time Downloads folder surveillance + Cookie/Cache exfiltration
+- **Pattern:** Active human-controlled attack with real-time monitoring AND session hijack capability
 
 ---
 
-## User Quote
+## User Quotes
 
 > "He's been tracking the whole time. That's 2 minutes after the data went"
+
+> "Likewise pulling cookies and cache so he'll have everything done on PC"
 
 ---
 
