@@ -1,6 +1,6 @@
 # Windows Install Interception Evidence Analysis
 **Date:** 2026-03-19
-**Machine:** Mini-Tank-MKII
+**Machine:** Mini-Tank-MKII (Domain: MINIM3)
 **Context:** User documenting malware persistence during fresh Windows install
 
 ---
@@ -8,7 +8,68 @@
 ## Evidence Sources
 Screenshots provided: IMG_0231, IMG_0253, IMG_0254, IMG_0255, IMG_0256, IMG_0258, IMG_0249, IMG_0260
 
-OCR extracted from one image showing cmd.exe + Notepad capturing Sysprep activity.
+**Primary evidence:** USMT (User State Migration Tool) log.xml files showing user profile capture during install.
+
+---
+
+## NEW: USMT Profile Capture Evidence (Screenshots Analyzed)
+
+### User Profile Data Being Harvested
+The screenshots show `log.xml` files from Windows USMT capturing full user profiles:
+
+**User 1 - Default User:**
+- Domain: `MINIM3`
+- LastAccess: `2026/03/18 9:23:14.09`
+- SID: `S-1-5-21-...` (visible in logs)
+- Full CSIDL shell folder mappings captured
+
+**User 2 - lloyd:**
+- Domain: `MINIM3` 
+- LastAccess: `2020/05/18 8:54:16.079` ⚠️ **TIMESTAMP ANOMALY - 6 years in the past**
+- ProfilePath: `C:\Users\lloyd`
+- Group memberships: `Administrators`, `Users`
+- Chocolatey installation detected: `%ChocolateyLastPathUpdate%`
+
+### Shell Folders Being Mapped
+All standard Windows shell folders captured including:
+- `%APPDATA%`, `%LOCALAPPDATA%`
+- `%CSIDL_CONTACTS%`, `%CSIDL_DOWNLOADS%`, `%CSIDL_DOCUMENTS%`
+- `%CSIDL_STARTMENU%`, `%CSIDL_STARTUP%`
+- Virtual store paths, OneDrive paths, SkyDrive paths
+
+### Downloads Folder Contents Captured
+User lloyd's Downloads folder contents enumerated:
+```
+claude_mk11_seed_package.md
+Firefox Installer.exe
+Git-2.39.0-64-bit.exe
+GitHubDesktopSetup-x64.exe (with hash: e3572612fe00832239b5ac599b1449fe:04808f...)
+AllSecurityTimebomber.exe ⚠️
+FilterFinder_Windows_x.2009208-a311-45a3-986b-r51517Se3e8e.exe ⚠️
+```
+
+### Start Menu Shortcuts Captured
+Full enumeration of installed programs via shortcuts:
+- Administrative Tools, PowerShell (x86 and x64)
+- Accessibility tools (magnify.exe, narrator.exe, osk.exe)
+- System tools (cmd.exe, control.exe)
+- Programs marked with `Target Path="UNKNOWN"` ⚠️
+
+---
+
+## Analysis: USMT Abuse Pattern
+
+**What's happening:** USMT is being run during Windows install to capture user profiles. This is a legitimate Windows feature BUT:
+
+1. **Why is it running on fresh install?** USMT captures existing user data for migration - it shouldn't have data to capture on a fresh install
+2. **Timestamp anomaly:** 2020 LastAccess on a 2026 machine = profile data from a previous machine/backup being injected?
+3. **Suspicious executables in Downloads:** Files like `AllSecurityTimebomber.exe` and the FilterFinder executable are red flags
+4. **UNKNOWN targets:** Start menu shortcuts pointing to `UNKNOWN` suggest tampering
+
+**Hypothesis:** Malware is using USMT to either:
+- A) Exfiltrate user profile data during install (sending it somewhere)
+- B) Inject a pre-captured user profile (persistence across reinstall)
+- C) Both - capture legitimate user data while injecting malicious profile data
 
 ---
 
@@ -95,17 +156,15 @@ Links to existing Mini-Tank-MKII investigation:
 ---
 
 ## Screenshot Index
-*(To be populated as images are processed)*
 
 | Image | Contents | Key Finding |
 |-------|----------|-------------|
-| IMG_0231 | tracer/aeinv | Initial capture |
-| IMG_0249 | TBD | |
-| IMG_0253 | Registry/Network profiles | |
-| IMG_0254 | More registry entries | |
-| IMG_0255 | TBD | |
-| IMG_0256 | TBD | |
-| IMG_0258 | TBD | |
+| f15d6af9 | USMT log.xml - Default User CSIDL mappings | Domain MINIM3, full shell folder capture |
+| 4aa25da7 | USMT log.xml - User lloyd Downloads enumeration | Suspicious executables listed, Chocolatey detected |
+| ecfcd578 | USMT log.xml - Start Menu shortcuts + user groups | UNKNOWN targets, Admin membership, 2020 timestamp |
+| e3c6e080 | (pending analysis) | |
+| b41c54fb | (pending analysis) | |
+| 2d3cf9b1 | (pending analysis) | |
 | IMG_0260 | OCR captured - Sysprep DLLs | DLL injection evidence |
 
 ---
