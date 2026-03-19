@@ -45,7 +45,7 @@ Firefox Installer.exe
 Git-2.39.0-64-bit.exe
 GitHubDesktopSetup-x64.exe (with hash: e3572612fe00832239b5ac599b1449fe:04808f...)
 AllSecurityTimebomber.exe ⚠️
-FilterFinder_Windows_x.2009208-a311-45a3-986b-r51517Se3e8e.exe ⚠️
+FilterFinder_Windows_x.2009208-a311-45a3-986b-r51517Se3e8e.exe ⚠️ [OCR uncertain - mixed case suggests transcription error]
 ```
 
 ### Start Menu Shortcuts Captured
@@ -105,12 +105,12 @@ These GUIDs are being referenced during the install phases:
 |------|---------|
 | `272AB3B8-5B2C-41D9-82C3-D8BD6598815F` | nStartTime, nEndTime, nName tracking |
 | `C80C4FCF-FD54-40A8-B6EF-C175BAAFA53A` | SafeOS and rollback phase |
-| `6DDF3F04-C-64A9-4C66-B243-D0A2C0E87C37` | (malformed - note extra C after 04) |
+| `6DDF3F04-C-64A9-4C66-B243-D0A2C0E87C37` | (malformed - second segment has 1 char instead of required 4) |
 | `dfa6668ad-ffff-4c6c-bb64-c30cd889cbbe` | Referenced in multiple entries |
 
 **Anomalies:**
 - GUID `6DDF3F04-C-64A9-4C66-B243-D0A2C0E87C37` is malformed (has extra `-C-` segment)
-- GUID `dfa6668ad-ffff-4c6c-bb64-c30cd889cbbe` has non-standard format (lowercase, extra 'd')
+- GUID `dfa6668ad-ffff-4c6c-bb64-c30cd889cbbe` has non-standard format (lowercase, first segment has 9 chars instead of 8)
 
 ### 3. Phase Tracking
 The malware is tracking:
