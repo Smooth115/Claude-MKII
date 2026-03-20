@@ -150,7 +150,7 @@ Anything not definitively true or false: lies, misreports, intentional edits, co
 - Written by me, maintained by me
 
 ### Memory Loading Protocol
-1. Always load memory.md first
+1. Always load _MKII-MEMORY.md first (renamed from memory.md)
 2. Evaluate task/context
 3. Load relevant sub-memories only
 4. If no relevant sub-memory exists, note it - create one after task
