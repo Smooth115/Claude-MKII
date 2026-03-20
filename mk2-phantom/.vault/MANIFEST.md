@@ -11,8 +11,8 @@
 | File | Original Location | Description |
 |------|------------------|-------------|
 | core-identity.md | .github/copilot-instructions.md | Full operational spec - who MKII is, all rules, user profile, evaluation frameworks |
-| memory-tracking.md | memory.md | Agent tracking copy - behavioral log, memory references, corrections |
-| access-control.md | AGENT_ACCESS.md | Repository access control table |
+| memory-tracking.md | _MKII-MEMORY.md | Agent tracking copy - behavioral log, memory references, corrections |
+| access-control.md | _MKII-AGENT-ACCESS.md | Repository access control table |
 | readme-original.md | README.md | Repository description and structure |
 | seeding-session.md | seeding-session-log.md | Complete record of 2026-03-17 seeding process |
 | simulation-tests.md | simulation-tests.md | 5 simulation tests + results from seeding |
@@ -47,3 +47,17 @@ find mk2-phantom/.vault -type f | sort | xargs sha256sum
 ```
 
 Last verified: 2026-03-20 (creation)
+
+---
+
+## Sync History
+
+| Date | Action | Files Synced | Archive |
+|------|--------|-------------|---------|
+| 2026-03-20 | Initial creation | All files | — |
+| 2026-03-20 | Sync to current | core-identity.md, memory-tracking.md | archive/vault-snapshot-pre-sync-2026-03-20.tar.gz |
+
+### Archive Contents
+| File | Description |
+|------|-------------|
+| archive/vault-snapshot-pre-sync-2026-03-20.tar.gz | Pre-sync vault copies (core-identity + memory-tracking) from initial creation |
