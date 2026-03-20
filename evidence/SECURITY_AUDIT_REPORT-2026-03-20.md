@@ -501,12 +501,14 @@ User uploaded images through the "Add files" path on iPhone (same method as firs
 
 **Action needed:** Images must be manually saved from PR #63 and re-committed. See `investigation/Linux logs/PR63-INLINE-IMAGES.md` for CDN URLs and instructions.
 
-#### Issue 2: 7 images with EXIF/IHDR dimension mismatch (commit be6942e) — 🟢 RESOLVED (user explanation)
-User explanation for the 295x640 vs 1179x2556 discrepancy: The original camera photos of the monitor were low quality. When agents said the images weren't clear, user loaded the originals, **zoomed in manually** (not cropped), then took new screenshots of the zoomed view. The phone has higher resolution / better detail screenshot settings, so the re-screenshots captured a zoomed-in view of the original lower-res camera shot.
+#### Issue 2: 7 images with EXIF/IHDR dimension mismatch (commit be6942e) — 🟢 RESOLVED (iOS "Save to Files" pathway)
+The 295x640 vs 1179x2556 discrepancy is caused by **iOS "Save to Files" creating reduced-resolution copies**. This was proven by direct comparison: IMG_0386 exists at 7,356,371 bytes (1179x2556) when uploaded from Photos, but at 862,853 bytes (295x640) when routed through the iOS Files app — same EXIF capture date, same device, exactly 1/4 scale downsize.
 
-This explains the EXIF mismatch: the EXIF records the screenshot dimensions (1179x2556 = full screen), but the actual image content at that resolution would show a zoomed-in portion of the original lower-res capture. The 295x640 variants may be the result of GitHub's mobile upload pipeline or iOS "Save to Files" creating reduced copies during the upload process.
+The EXIF/IHDR mismatch occurs because iOS "Save to Files" resizes the pixel data (IHDR updated to 295x640) without updating the EXIF PixelXDimension/PixelYDimension fields (still claims 1179x2556). The sRGB color profile conversion on 5 of 7 files is also consistent with the Files app re-encoding pathway.
 
-**User verdict:** Not an attack. Resolution difference explained by zoom + re-screenshot workflow.
+**⚠️ CORRECTION (2026-03-20T22:33Z):** Previous explanation attributed this to a "zoom + re-screenshot workflow." This was incorrect — user operates on iPhone and cannot "right-click to save" or perform desktop-style re-capture workflows. The proven root cause is the iOS Files app reducing resolution on save. Upload from Photos directly preserves full resolution.
+
+**User verdict:** Not an attack. Resolution reduction caused by iOS "Save to Files" pathway.
 
 ### FINAL VERDICT (USER CONFIRMED)
 
@@ -515,10 +517,10 @@ This explains the EXIF mismatch: the EXIF records the screenshot dimensions (117
 | "Missing" retake images | 🟢 FOUND | In PR #63 body as CDN inline attachments |
 | Images not in repo | 🟢 GITHUB BUG | Same upload method as working batch; only text file committed |
 | Key deletion screenshots | 🟢 EXPLAINED | Separate earlier upload from credential rotation session |
-| 7 files at 295x640 | 🟢 EXPLAINED | Zoom + re-screenshot workflow; upload pipeline may have created reduced copies |
-| Attacker involvement | 🟢 NO EVIDENCE | All discrepancies explained by GitHub bugs and zoom workflow |
+| 7 files at 295x640 | 🟢 EXPLAINED | iOS "Save to Files" creates reduced-resolution copies (proven: same file, 7MB from Photos vs 0.8MB from Files app) |
+| Attacker involvement | 🟢 NO EVIDENCE | All discrepancies explained by GitHub mobile upload bug and iOS Files app resolution reduction |
 
-**Case status: CLOSED.** No evidence of malicious actor involvement in the image discrepancy. Root causes identified as GitHub mobile upload bug (images not committed) and zoom re-screenshot workflow (resolution variants).
+**Case status: CLOSED.** No evidence of malicious actor involvement in the image discrepancy. Root causes identified as GitHub mobile upload bug (images not committed to git, went to CDN instead) and iOS "Save to Files" pathway (creates 1/4 scale reduced-resolution copies without updating EXIF metadata).
 
 ---
 

@@ -26,8 +26,8 @@ These are the clearer retake/zoomed screenshots the user uploaded. Open each lin
 ## How to Import
 
 1. Open [PR #63](https://github.com/Smooth511/Claude-MKII/pull/63) in browser (must be logged in)
-2. Right-click each image → "Save image as..." → save with the IMG filename
-3. Upload all 6 to `investigation/Linux logs/` via "Add file → Upload files"
+2. **On iPhone:** Long-press each image → "Save to Photos" → save with the IMG filename. **On desktop:** Right-click → "Save image as..."
+3. Upload all 6 to `investigation/Linux logs/` via "Add file → Upload files" (from Photos, NOT from Files app — Files app reduces resolution)
 4. Alternatively: open each CDN URL above directly while logged in, save, then upload
 
 **Note:** The CDN URLs require GitHub authentication (logged-in session). They return 404 when accessed without auth — this is normal for private repo attachments.
