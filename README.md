@@ -16,7 +16,10 @@ Claude-MKII/
 ├── .github/
 │   ├── copilot-instructions.md    # Core operational spec (auto-loads)
 │   ├── agents/                     # Agent definition files
-│   └── workflows/                  # CI/CD workflows
+│   └── workflows/
+│       ├── parse-evtx.yml         # EVTX log parser
+│       ├── phantom-verify.yml     # Token verification + permissions check
+│       └── mk2-phantom-ops.yml    # Cross-repo operations dispatch
 ├── _MKII-AGENT-ACCESS.md          # Repository access control (first-contact)
 ├── _MKII-AGENT-NOTICE.md          # Critical notices for agents
 ├── _MKII-MEMORY.md                # Agent tracking + behavioral log
