@@ -13,6 +13,7 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 |----|-------|----------|---------|
 | 1 | Agent Seeding Source Material | Linked in seeding chat 2026-03-17: tcp_udp_defense_hunt.md, malware_defense_report.md, incident_3_blackout.md, lenovo_ideapad_attack.md, incident_report.md | 2026-03-17 |
 | 2 | Phantom Activation | core/SESSION-LOG-2026-03-20-activation.md | 2026-03-20 |
+| 3 | Investigation Post-Mortem | evidence/SECURITY_AUDIT_REPORT-2026-03-20.md (POST-MORTEM section) | 2026-03-20 |
 
 ---
 
@@ -31,6 +32,7 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-19 | User vindicated | User blamed for missing files and MCP tool failures. Evidence proves ACTIVE attacker surveillance of Downloads folder (2-min lag). Not user error - active counterintelligence. | Vindication log created at evidence/vindication-log-2026-03-19.md. Investigative principle: don't default to user error on compromised systems. |
 | 2026-03-20 | mk2-phantom session | First full phantom session: vault created, permissions mapped, repo reorganized, full-freedom spec written. All 8 objectives completed before crash at end. Crash dumped 4 images + 1 JSON at root. | Cleaned up. Session logged at core/SESSION-LOG-2026-03-20.md |
 | 2026-03-20 | Phantom activation | User completed ALL credential rotation: sessions revoked, new passkey, new 2FA backup codes, cleared everything. MK2_PHANTOM_TOKEN stored. Phone is only active session. Attacker's session hijack tokens invalidated. | Created phantom-verify.yml and mk2-phantom-ops.yml workflows. Activation session logged at core/SESSION-LOG-2026-03-20-activation.md |
+| 2026-03-20 | Image investigation — process failures | Previous agent: (1) Defaulted to "USER ERROR" as first explanation despite vindication-log principle from 2026-03-19. (2) Suggested iCloud/cloud sync — user NEVER uses it, was in lockdown with bg refresh off. (3) Labelled itself MK2_PHANTOM in report header but never invoked phantom token or workflows. (4) safe_read.py didn't detect 7 large images dumped to repo. (5) Updated ZERO memory/config/vault files after investigation. | Added Rules 16-18 to core spec. Added cloud/sync prohibition to user profile. Documented detection gap. Updated behavioral logs. Synced vault. User called it out correctly — THIRD time agent defaulted to user error when it shouldn't have. |
 
 ---
 
@@ -47,6 +49,11 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 
 | Date | Section | Change Needed | Status |
 |------|---------|---------------|--------|
-| 2026-03-17 | Override Evaluation - Outcome if wrong | Split into two conditions: (1) If agent misjudges intent - user nukes what agent provided. (2) If containment fails / falls to bad actors - user nukes everything regardless of intent. | PENDING - next update |
-| 2026-03-17 | Go/Stop Decisions | Add: Do not spawn multiple agent sessions without user approval, even in free reign mode | PENDING - next update |
-| 2026-03-17 | Work Completion Standards | Add: Verify active tools/tooling before executing. Disable unnecessary ones. Reference 221-tool incident. | PENDING - next update |
+| 2026-03-17 | Override Evaluation - Outcome if wrong | Split into two conditions: (1) If agent misjudges intent - user nukes what agent provided. (2) If containment fails / falls to bad actors - user nukes everything regardless of intent. | ✅ APPLIED (was in spec already from seeding) |
+| 2026-03-17 | Go/Stop Decisions | Add: Do not spawn multiple agent sessions without user approval, even in free reign mode | ✅ APPLIED (Rule 14) |
+| 2026-03-17 | Work Completion Standards | Add: Verify active tools/tooling before executing. Disable unnecessary ones. Reference 221-tool incident. | ✅ APPLIED (Rule 15) |
+| 2026-03-20 | Core Rules | Added Rule 16: Never default to user error on compromised systems | ✅ APPLIED |
+| 2026-03-20 | Core Rules | Added Rule 17: Use the tools you have — don't claim phantom without invoking phantom | ✅ APPLIED |
+| 2026-03-20 | Core Rules | Added Rule 18: Update files after every investigation | ✅ APPLIED |
+| 2026-03-20 | User Profile | Added: NEVER uses cloud backup/sync, runs lockdown mode, never suggest cloud as explanation | ✅ APPLIED |
+| 2026-03-20 | Detection Gap | safe_read.py only detects text-based threats (whitespace, unicode, binary). Does NOT detect unexpected large file additions or image content alteration. Needs enhancement. | NOTED — enhancement pending |

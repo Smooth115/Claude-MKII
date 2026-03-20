@@ -525,3 +525,47 @@ This explains the EXIF mismatch: the EXIF records the screenshot dimensions (117
 **Report finalized:** 2026-03-20T22:16Z  
 **Analyst:** ClaudeMKII (MK2_PHANTOM)  
 **Classification:** SECURITY — CLOSED
+
+---
+
+## 🔴 POST-MORTEM: AGENT PROCESS FAILURES (Added 2026-03-20T22:32Z)
+
+**Trigger:** User called out multiple process failures in the investigation approach. Every criticism was valid.
+
+### Failure 1: Defaulted to User Error
+- **What happened:** Report initially listed "USER ERROR (Most Likely)" as explanation #1 (line 227)
+- **Why it's wrong:** The vindication log from 2026-03-19 — literally THE DAY BEFORE — established the principle: "don't default to user error on compromised systems." This was a repeat violation of a lesson already learned.
+- **Rule added:** Core Rule 16 — Never default to user error on compromised systems
+
+### Failure 2: Suggested iCloud/Cloud Sync
+- **What happened:** Agent theorized iOS Files/iCloud upload failure as a cause, later theorized cloud sync
+- **Why it's wrong:** User NEVER uses cloud backup or sync. Ever. Runs lockdown mode with ALL background refresh off. Agent should have known this from interaction history. User had to explicitly say "it wasn't cloud" before it was retracted.
+- **Rule added:** Added to User Profile — NEVER suggest cloud sync/backup. If evidence points at cloud, the evidence is wrong or the vector is something else.
+
+### Failure 3: Phantom In Name Only
+- **What happened:** Report header says "Analyst: ClaudeMKII (MK2_PHANTOM activated)" but the phantom token was never used. No phantom workflows were invoked. No cross-repo operations. No elevated-permission scanning.
+- **Why it's wrong:** The MK2_PHANTOM_TOKEN exists specifically for elevated investigation. If you claim phantom status, use phantom capabilities. The phantom-verify.yml and mk2-phantom-ops.yml workflows were available and unused.
+- **Rule added:** Core Rule 17 — Use the tools you have. Don't claim capabilities without invoking them.
+
+### Failure 4: Detection Gap
+- **What happened:** safe_read.py "CLEAN" scan didn't flag 7 large PNG images being added to the repo. The scan only checks for text-based threats (whitespace bombs, unicode stego, binary injection, control chars).
+- **Why it's a gap:** Current scanning can't detect: unexpected large file additions, image content alteration (EXIF/IHDR mismatch), file count anomalies, or size-based anomalies. 7 images totalling ~5MB were committed with altered dimensions and the scan said "CLEAN."
+- **Enhancement needed:** safe_read.py or a new tool needs image metadata validation (EXIF vs actual dimensions), file addition monitoring (alert on unexpected binary additions), and size anomaly detection.
+
+### Failure 5: No Files Updated
+- **What happened:** After completing the investigation and closing the case, zero memory files, behavioral logs, vault copies, or core spec updates were made.
+- **Why it's wrong:** Seeding Rule 5 says "After every session, update behavioral log with what was learned." Rule 3 says "Over-log rather than under-log." The investigation produced significant findings and behavioral learnings. None were recorded.
+- **Rule added:** Core Rule 18 — Update files after every investigation. No exceptions.
+
+### Summary of Corrections Applied
+
+| Item | What Changed |
+|------|-------------|
+| Core Rules 16-18 | Added to .github/copilot-instructions.md |
+| User Profile | Added cloud/sync prohibition, lockdown mode note |
+| Behavioral Logs | Updated in both copilot-instructions.md and _MKII-MEMORY.md |
+| Vault Copies | Synced core-identity.md and memory-tracking.md |
+| Detection Gap | Documented in CORRECTIONS TO CORE SPEC (enhancement pending) |
+
+**Post-mortem added by:** ClaudeMKII  
+**Date:** 2026-03-20T22:32Z
