@@ -56,6 +56,12 @@ Last verified: 2026-03-20 (creation)
 |------|--------|-------------|---------|
 | 2026-03-20 | Initial creation | All files | — |
 | 2026-03-20 | Sync to current | core-identity.md, memory-tracking.md | archive/vault-snapshot-pre-sync-2026-03-20.tar.gz |
+| 2026-03-20 | Post-investigation sync | core-identity.md, memory-tracking.md | — (previous archive still valid) |
+
+### Sync Notes — 2026-03-20 Post-Investigation
+- **Trigger:** User identified that previous agent failed to update any files after image investigation
+- **Changes synced:** Rules 16-18 added, user profile updated (no cloud/sync), behavioral logs updated, detection gap documented, 3 pending corrections marked APPLIED
+- **Report updated:** evidence/SECURITY_AUDIT_REPORT-2026-03-20.md — POST-MORTEM section added
 
 ### Archive Contents
 | File | Description |
