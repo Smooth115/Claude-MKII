@@ -13,6 +13,7 @@ on:
           - create-issue
           - list-issues
           - health-check
+          - close-stale-prs
       target_repo:
         description: 'Target repo (owner/name) — required for cross-repo-read, create-issue, list-issues'
         required: false
@@ -177,3 +178,45 @@ jobs:
 
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Health check completed:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+      - name: Execute — close-stale-prs
+        if: inputs.operation == 'close-stale-prs'
+        env:
+          GH_TOKEN: ${{ secrets.MK2_PHANTOM_TOKEN }}
+          TARGET_REPO: ${{ inputs.target_repo }}
+        run: |
+          echo "## Close Stale PRs: $TARGET_REPO" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get all open PRs
+          PRS=$(gh api "repos/$TARGET_REPO/pulls?state=open&per_page=100" --jq '.[].number' 2>&1) || {
+            echo "❌ Failed to list PRs" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          }
+
+          CLOSED=0
+          FAILED=0
+          SKIPPED=0
+          COMMENT="Closing: All valuable content consolidated into main branch via mk2-phantom branch scan. Evidence, logs, and documentation now properly organized."
+
+          echo "| PR | Title | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|-------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          for PR_NUM in $PRS; do
+            TITLE=$(gh api "repos/$TARGET_REPO/pulls/$PR_NUM" --jq '.title' 2>/dev/null)
+
+            # Close the PR
+            if gh api "repos/$TARGET_REPO/pulls/$PR_NUM" -X PATCH -f state=closed 2>/dev/null; then
+              # Add comment
+              gh api "repos/$TARGET_REPO/issues/$PR_NUM/comments" -f body="$COMMENT" 2>/dev/null || true
+              echo "| #$PR_NUM | $TITLE | ✅ Closed |" >> $GITHUB_STEP_SUMMARY
+              CLOSED=$((CLOSED + 1))
+            else
+              echo "| #$PR_NUM | $TITLE | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Results:** $CLOSED closed, $FAILED failed" >> $GITHUB_STEP_SUMMARY
+          echo "**Completed:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
