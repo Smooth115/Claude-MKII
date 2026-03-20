@@ -54,7 +54,7 @@ This follow-on evaluation addresses:
 **🟢 Assessment:** Confirms successful credential rotation. Old key deleted, new token (MK2_PHANTOM_TOKEN) in place. Security posture restored.
 
 **Connection to Investigation:**
-This credential rotation was part of the response to the session hijack threat documented in the evidence folder. The attacker was exfiltrating cookies/cache for session hijacking - rotating credentials invalidates any captured authentication tokens.
+This credential rotation was part of the response to the session hijack threat documented in `evidence/downloads-folder-surveillance-2026-03-19.md`. The attacker was exfiltrating cookies/cache for session hijacking - rotating credentials invalidates any captured authentication tokens.
 
 ---
 
@@ -172,8 +172,10 @@ From all sessions combined:
 
 | Metric | Value |
 |--------|-------|
-| Total Images | 21 (15 original + 6 new from PR #63) |
-| Fully Analyzed | 17 |
+| Original Images | 19 (in investigation/Linux logs/) |
+| Root Images | 2 (IMG_0401, IMG_0402) |
+| PR #63 Clearer Versions | 6 (inline attachments - same content, higher resolution) |
+| **Unique Content Analyzed** | 17 of 21 unique images |
 | Pending Review | 4 (low-res requiring re-capture) |
 | Coverage | **81%** |
 | Critical Findings | 5 documented, 2 escalated |
