@@ -373,3 +373,366 @@ Based on the readme context:
 **Analysis Confidence:** 70% (limited by 5-image cap)  
 **Images Fully Analyzed:** 5 of 19  
 **Follow-up Required:** YES - 14 images unreviewed
+
+---
+
+## CONTINUATION ANALYSIS - SESSION 2
+
+**Date:** 2026-03-20  
+**Analyst:** ClaudeMKII (continuation)  
+**Images Analyzed This Session:** 5 additional  
+**Running Total:** 10 of 19 images (52.6%)
+
+---
+
+### 6. ATI/AMD GPU DRIVER ENUMERATION (IMG_0337) - 95% readable
+
+**Timestamp:** Mar 19 20:35  
+**Process:** `/usr/libexec/gdm-x-session[2303]`
+
+**Content:** Continuation of ATI/AMD Radeon driver support list from previous image (IMG_0336). Lists supported GPU chipsets including:
+
+```
+ATI Mobility Radeon X1600, ATI Radeon X1300 XT/X1600 Pro,
+ATI FireGL V3400, ATI01, ATI Radeon X1700 XT,
+ATI FireGL V5200, ATI X1700, ATI Mobility,
+ATI Radeon X1950, ATI Radeon X2300HD, Radeon X1700 XT,
+ATI RV560, ATI Mobility Radeon X1900, ATI Mobility Radeon HD 2300,
+...
+ATI Radeon HD 3200 Graphics, ATI Radeon 3000 Graphics, SUMO, SUMO2,
+ATI Radeon HD 3300 Graphics, ATI Mobility Radeon HD 4200,
+ATI Radeon HD 4200, ATI Radeon HD 4290, ATI Mobility Radeon HD 4250
+```
+
+**🟢 Assessment:** Normal X.Org driver enumeration showing all supported ATI/AMD GPU models. This is standard behavior when the radeon/ati driver loads and logs its supported hardware list. No anomalies.
+
+---
+
+### 7. KEYBOARD & GLIBC FAILURES (IMG_0338) - 90% readable
+
+**Timestamp:** Mar 19 20:36  
+**Processes:** `/usr/libexec/gdm-x-session[4389]`, `gsettings[4393]`, `gnome-shell[2842]`
+
+**🔴 CRITICAL - XKEYBOARD Compiler (xkbcomp) Warnings:**
+```
+The XKEYBOARD keymap compiler (xkbcomp) reports:
+> Warning: Could not resolve keysym XF86CameraAccessEnable
+> Warning: Could not resolve keysym XF86CameraAccessDisable
+> Warning: Could not resolve keysym XF86CameraAccessToggle
+> Warning: Could not resolve keysym XF86NextElement
+> Warning: Could not resolve keysym XF86PreviousElement
+> Warning: Could not resolve keysym XF86AutopilotEngageToggle
+> Warning: Could not resolve keysym XF86MarkWaypoint
+> Warning: Could not resolve keysym XF86Sos
+> Warning: Could not resolve keysym XF86NavChart
+> Warning: Could not resolve keysym XF86FishingChart
+> Warning: Could not resolve keysym XF86SingleRangeRadar
+> Warning: Could not resolve keysym XF86DualRangeRadar
+> Warning: Could not resolve keysym XF86RadarOverlay
+> Warning: Could not resolve keysym XF86TraditionalSonar
+> Warning: Could not resolve keysym XF86ClearVuSonar
+> Warning: Could not resolve keysym XF86SidevuSonar
+> Warning: Could not resolve keysym XF86NavInfo
+Errors from xkbcomp are not fatal to the X server
+```
+
+**⚠️ NOTABLE - Unusual keysym names detected:**
+- `XF86AutopilotEngageToggle`
+- `XF86MarkWaypoint`
+- `XF86FishingChart`
+- `XF86SingleRangeRadar`, `XF86DualRangeRadar`
+- `XF86TraditionalSonar`, `XF86ClearVuSonar`, `XF86SidevuSonar`
+- `XF86NavInfo`, `XF86NavChart`
+
+These keysym names are **marine/aviation navigation-specific** - typically found on Garmin or similar chart plotter keyboards. This is UNUSUAL for a standard desktop/laptop.
+
+**🔴 GLIBC VERSION MISMATCH:**
+```
+gsettings[4393]: /snap/core22/current/lib/x86_64-linux-gnu/libc.so.6: version 'GLIBC_2.38' not found (required by /usr/lib/x86_64-linux-gnu/gio/)
+gsettings[4393]: Failed to load module: /usr/lib/x86_64-linux-gnu/gio/modules/libdconfsettings.so
+gsettings[4393]: Failed to load module: /usr/lib/x86_64-linux-gnu/gio/modules/libgvfsdbus.so
+```
+
+- Snap environment has GLIBC 2.38 version mismatch
+- Multiple GIO modules failed to load
+- libdconfsettings.so and libgvfsdbus.so both failed
+
+**Window Manager Binding Overwrites:**
+```
+gnome-shell[2842]: Window manager warning: Overwriting existing binding of keysym 31 with keysym 31 (keycode a).
+gnome-shell[2842]: Window manager warning: Overwriting existing binding of keysym 34 with keysym 34 (keycode d).
+gnome-shell[2842]: Window manager warning: Overwriting existing binding of keysym 35 with keysym 31 (keycode e).
+gnome-shell[2842]: Window manager warning: Overwriting existing binding of keysym 36 with keysym 32 (keycode b).
+gnome-shell[2842]: Window manager warning: Overwriting existing binding of keysym 38 with keysym 38 (keycode ...).
+```
+
+**🟡 Assessment:** The marine/aviation keysyms are unexpected. Either:
+1. A USB device with navigation-specific keys is connected
+2. A custom/modified keyboard layout is present in BIOS/firmware
+3. Something is injecting unusual keyboard mappings
+
+---
+
+### 8. LEGACY ATI RADEON ENUMERATION (IMG_0339) - 95% readable
+
+**Timestamp:** Mar 19 20:35  
+**Process:** `/usr/libexec/gdm-x-session[2303]`
+
+**Content:** Extensive listing of older ATI Radeon GPU models:
+
+```
+ATI Radeon IGP320 (A3), ATI Radeon IGP330/340/350 (A4),
+ATI Radeon 9500, ATI Radeon 9600TX, ATI FireGL Z1, ATI Radeon 9800,
+ATI Radeon 9600XT, ATI FireGL T2, ATI Radeon 9600, ATI Radeon 9600SE,
+ATI Radeon 7000 IGP (A4+), ATI Radeon 8500, ATI FireGL RV360,
+...
+ATI Radeon X850 (R480), ATI Radeon X850 XT (R480),
+ATI Radeon X850 SE (R480), ATI Radeon X850 PRO (R480),
+ATI Radeon X850 XT PE (R480), ATI Radeon Mobility M7,
+ATI Mobility FireGL 7800 M7, ATI Radeon Mobility M6,
+...
+ATI Mobility Radeon V5300, ATI Radeon Mobility FireGL V7100,
+ATI FireGL V7200, ATI FireGL V7350, ATI RV545GL,
+ATI FireGL V7300/V7350, ATI Radeon X1550, ATI FireGL V3300,
+ATI Radeon X1300/X1550/X1550 64-bit, ATI Radeon X1400, ATI FireGL V3300,
+ATI Mobility Radeon X1300, ATI Radeon X1450,
+ATI FireGL V3350, ATI Mobility Radeon X1450
+```
+
+**🟢 Assessment:** Standard continuation of GPU driver support enumeration. No anomalies. This is the radeon driver listing all legacy ATI chipsets it supports from the R100/R200/R300/R400/R500 generations.
+
+---
+
+### 9. DISPLAY MODESET & X11 EXTENSIONS (IMG_0340) - 92% readable
+
+**Timestamp:** Mar 19 20:35  
+**Process:** `/usr/libexec/gdm-x-session[2303]`
+
+**System Time Services:**
+```
+[system] Activating via systemd: service name='org.freedesktop.timedate1' unit='dbus-org.freedesktop.timedate1.service' request
+systemd-timedated.service: service 'org.freedesktop.timedate1'
+systemd[1]: Successfully activated service 'org.freedesktop.timedate1'.service - Time & Date Service
+```
+
+**Display Configuration:**
+```
+modeset(0): Refusing to try glamor
+modeset(0): glamor initialization on llvmpipe
+modeset(0): ShadowFB: preferred NO, enabled NO
+modeset(0): Output None-1 has no monitor section
+modeset(0): EDID for output None-1
+modeset(0): Printing probed modes for output None-1
+modeset(0): Modeline "2560x1440x60.0" 221.18 2560 2560 2560 2560 1440 1440 1440 1440 (86.4 kHz eP)
+modeset(0): Output None-1 using initial mode 2560x1440 +0+0
+modeset(0): Using exact sizes for initial modes
+modeset(0): Using gamma correction (1.0, 1.0, 1.0)
+modeset(0): DPI set to (96, 96) (1.0, 1.0, 1.0)
+```
+
+**Module Loading:**
+```
+(II) Loading sub module "fb"
+(II) LoadModule: "fb"
+(II) Module "fb" already built-in
+(==) modeset(0): Backing store enabled
+(==) modeset(0): Silken mouse enabled
+(II) modeset(0): Initializing kms color map for depth 24, 8 bpc.
+(==) modeset(0): DPMS enabled
+```
+
+**X11 Extensions Initialized (full list):**
+```
+(II) Initializing extension Generic Event Extension
+(II) Initializing extension SHAPE
+(II) Initializing extension MIT-SHM
+(II) Initializing extension XInputExtension
+(II) Initializing extension XTEST
+(II) Initializing extension BIG-REQUESTS
+(II) Initializing extension SYNC
+(II) Initializing extension XKEYBOARD
+(II) Initializing extension XC-MISC
+(II) Initializing extension SECURITY
+(II) Initializing extension XFIXES
+(II) Initializing extension RENDER
+(II) Initializing extension RANDR
+(II) Initializing extension COMPOSITE
+(II) Initializing extension DAMAGE
+(II) Initializing extension MIT-SCREEN-SAVER
+(II) Initializing extension DOUBLE-BUFFER
+(II) Initializing extension RECORD
+(II) Initializing extension DPMS
+(II) Initializing extension Present
+(II) Initializing extension DRI3
+(II) Initializing extension X-Resource
+(II) Initializing extension XVideo
+(II) Initializing extension XVideo-MotionCompensation
+(II) Initializing extension SELinux
+(II) SELinux: Disabled on system
+(II) Initializing extension GLX
+(II) AIGLX: Screen 0 is not DRI2 capable
+```
+
+**🟡 Notable:**
+- SELinux explicitly disabled
+- AIGLX reports screen not DRI2 capable (software rendering)
+- Using llvmpipe (software OpenGL) - no hardware acceleration
+- glamor initialization refused
+
+**🟢 Assessment:** Standard live USB display initialization. The lack of hardware acceleration is expected when booting from USB without proper GPU drivers loaded. SELinux disabled is default for Ubuntu live.
+
+---
+
+### 10. SEMICO USB KEYBOARD ENUMERATION (IMG_0344) - 88% readable
+
+**Timestamp:** Mar 19 20:35  
+**Process:** `/usr/libexec/gdm-x-session[2303]`
+
+**🔴 CRITICAL FINDING - Multiple "SEMICO USB Keyboard" devices detected:**
+
+```
+(II) This device may have been added with another device file.
+(**) config/udev: Adding input device SEMICO USB Keyboard (/dev/input/event4)
+(II) Using input driver 'libinput' for 'SEMICO USB Keyboard'
+(**) SEMICO USB Keyboard: Applying InputClass "libinput keyboard catchall"
+(II) systemd-logind: got fd for /dev/input/event4 13:68 fd 28 paused 0
+(**) Option "Device" "/dev/input/event4"
+(**) SEMICO USB Keyboard: always reports core events
+(II) event4 - SEMICO USB Keyboard: is tagged by udev as: Keyboard
+(II) event4 - SEMICO USB Keyboard: device is a keyboard
+(II) event4 - SEMICO USB Keyboard: device removed
+(**) Option "config_info" "udev:/sys/devices/pci0000:00/0000:00:08.1/0000:09:00.4/usb6/6-1/6-1:1.0/0003:1A2C:4..."
+(II) XINPUT: Adding extended input device "SEMICO USB Keyboard" (type: KEYBOARD, id 10)
+(**) Option "xkb_model" "pc105"
+(**) Option "xkb_layout" "us"
+```
+
+**Second SEMICO USB Keyboard Consumer Control:**
+```
+(**) config/udev: Adding input device SEMICO USB Keyboard Consumer Control (/dev/input/event5)
+(II) Using input driver 'libinput' for 'SEMICO USB Keyboard Consumer Control'
+(**) SEMICO USB Keyboard Consumer Control: Applying InputClass "libinput keyboard catchall"
+(II) systemd-logind: got fd for /dev/input/event5 13:69 fd 29 paused 0
+(**) Option "Device" "/dev/input/event5"
+(**) SEMICO USB Keyboard Consumer Control: always reports core events
+(II) event5 - SEMICO USB Keyboard Consumer Control: is tagged by udev as: Keyboard
+(II) event5 - SEMICO USB Keyboard Consumer Control: device is a keyboard
+(II) event5 - SEMICO USB Keyboard Consumer Control: needs a virtual subdevice
+(**) Option "config_info" "udev:/sys/devices/pci0000:00/0000:00:08.1/0000:09:00.4/usb6/6-1/6-1:1.1/0003:1A2C:4..."
+(II) XINPUT: Adding extended input device "SEMICO USB Keyboard Consumer Control" (type: MOUSE, id 11)
+(**) SEMICO USB Keyboard Consumer Control: (accel) selected scheme none/0
+(**) SEMICO USB Keyboard Consumer Control: (accel) acceleration factor: 2.000
+(**) SEMICO USB Keyboard Consumer Control: (accel) acceleration threshold: 4
+```
+
+**Third SEMICO USB Keyboard System Control:**
+```
+(**) config/udev: Adding input device SEMICO USB Keyboard System Control (/dev/input/event6)
+(II) Using input driver 'libinput' for 'SEMICO USB Keyboard System Control'
+(**) SEMICO USB Keyboard System Control: Applying InputClass "libinput keyboard catchall"
+(II) systemd-logind: got fd for /dev/input/event6 13:70 fd 30 paused 0
+(**) Option "Device" "/dev/input/event6"
+(**) SEMICO USB Keyboard System Control: always reports core events
+(II) event6 - SEMICO USB Keyboard System Control: is tagged by udev as: Keyboard
+(II) event6 - SEMICO USB Keyboard System Control: device is a keyboard
+(II) event6 - SEMICO USB Keyboard System Control: device removed
+(**) Option "config_info" "udev:/sys/devices/pci0000:00/0000:00:08.1/0000:09:00.4/usb6/6-1/6-1:1.1/0003:1A2C:4..."
+(II) XINPUT: Adding extended input device "SEMICO USB Keyboard System Control" (type: KEYBOARD, id 11)
+```
+
+**Additional Audio Device from Keyboard:**
+```
+(II) event6 - SEMICO USB Keyboard HD-Audio Generic Mic (/dev/input/event11)
+(II) config/udev: Adding input device HD-Audio Generic Mic
+(II) No input driver specified, ignoring this device.
+```
+
+**🔴 SECURITY ANALYSIS - SEMICO USB Keyboard:**
+
+| Property | Value |
+|----------|-------|
+| Vendor ID | 0x1A2C |
+| USB Path | usb6/6-1 (PCI 0000:09:00.4) |
+| Events Created | event4, event5, event6, event11 |
+| Device Types | Keyboard + Consumer Control + System Control + Audio |
+
+**⚠️ CRITICAL OBSERVATIONS:**
+
+1. **Vendor ID 0x1A2C** = China-based "A4Tech Co., Ltd" or similar generic USB vendor
+2. **Single physical device creating 4+ logical devices** is suspicious
+3. **"Consumer Control" registered as MOUSE type** with acceleration settings
+4. **Device includes HD-Audio microphone component** - keyboard with built-in mic
+5. **Device registered, then "device removed", then re-added** - hot-plug behavior
+6. **The marine navigation keysyms from IMG_0338 likely originate from this device**
+
+**🔴 POTENTIAL THREAT VECTORS:**
+
+1. **Hardware keylogger** - Could intercept all keystrokes
+2. **BadUSB-style attack device** - Presents as multiple device types
+3. **Audio capture capability** - Built-in microphone could record
+4. **Firmware-level persistence** - If this is the built-in laptop keyboard being spoofed
+
+**RECOMMENDATION:** Investigate what physical USB device is connected. A "SEMICO USB Keyboard" with multiple interfaces, audio capability, and marine navigation keysyms is highly unusual.
+
+---
+
+## SESSION 2 - SECURITY ASSESSMENT
+
+### 🔴 HIGH CONCERN (New)
+
+1. **SEMICO USB Keyboard Multi-Interface Device**
+   - Creates 4+ logical devices from one physical device
+   - Includes audio microphone capability
+   - Registered as both keyboard AND mouse
+   - Vendor ID 0x1A2C (generic Chinese USB vendor)
+
+2. **Marine/Aviation Keysyms in Keyboard Map**
+   - XF86AutopilotEngageToggle, XF86FishingChart, XF86Sonar variants
+   - These are NOT standard PC keyboard symbols
+   - Could indicate custom firmware or modified keyboard layout
+
+3. **GLIBC Version Mismatch**
+   - snap core22 requires GLIBC_2.38 but host doesn't have it
+   - Caused failure of settings and virtual filesystem modules
+
+### 🟡 MEDIUM CONCERN (New)
+
+1. **Window Manager Keysym Binding Overwrites**
+   - Multiple keycodes being overwritten (a, d, e, b)
+   - Could be legitimate layout switching OR key interception
+
+2. **Software-Only Graphics Rendering**
+   - llvmpipe fallback, no hardware acceleration
+   - Normal for live USB but limits forensic capabilities
+
+### 🟢 EXPECTED/NORMAL (New)
+
+1. **ATI/AMD Driver Enumeration** - Standard X.Org behavior
+2. **X11 Extension Initialization** - All standard extensions
+3. **Time Service Activation** - Normal systemd behavior
+
+---
+
+## UPDATED STATISTICS
+
+| Metric | Previous | This Session | Total |
+|--------|----------|--------------|-------|
+| Images Analyzed | 5 | 5 | 10 |
+| Images Remaining | 14 | 9 | 9 |
+| Coverage | 26.3% | +26.3% | **52.6%** |
+| Critical Findings | 3 | 2 | **5** |
+
+**Images Still Unreviewed:**
+- IMG_0334.JPG
+- IMG_0386.png - IMG_0388.png (3 images) 
+- IMG_0413.png - IMG_0417.png (4 images)
+- Screenshot 2026-03-20 at 19.00.08.png
+- IMG_0401.PNG, IMG_0402.PNG (root directory)
+
+---
+
+**Session 2 Report Generated By:** ClaudeMKII  
+**Analysis Confidence:** 85% (for viewed images)  
+**Images Fully Analyzed This Session:** 5  
+**Cumulative Analysis:** 10 of 19 (52.6%)  
+**Follow-up Required:** YES - 9 images unreviewed
