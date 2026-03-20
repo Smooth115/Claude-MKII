@@ -62,11 +62,11 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Accessible Repositories" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Repository | Private | Permissions |" >> $GITHUB_STEP_SUMMARY
-          echo "|------------|---------|-------------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Repository | Private | Push | Admin |" >> $GITHUB_STEP_SUMMARY
+          echo "|------------|---------|------|-------|" >> $GITHUB_STEP_SUMMARY
 
-          gh api user/repos --paginate --jq '.[] | "| \(.full_name) | \(.private) | push:\(.permissions.push) admin:\(.permissions.admin) |"' >> $GITHUB_STEP_SUMMARY 2>&1 || {
-            echo "| ❌ Failed to list repos | - | - |" >> $GITHUB_STEP_SUMMARY
+          gh api user/repos --paginate --jq '.[] | "| \(.full_name) | \(.private) | \(.permissions.push) | \(.permissions.admin) |"' >> $GITHUB_STEP_SUMMARY 2>&1 || {
+            echo "| ❌ Failed to list repos | - | - | - |" >> $GITHUB_STEP_SUMMARY
           }
 
       - name: Check specific permissions

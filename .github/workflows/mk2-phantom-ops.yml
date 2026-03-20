@@ -160,7 +160,7 @@ jobs:
           }
 
           # Repo count
-          REPO_COUNT=$(gh api user/repos --paginate --jq '. | length' 2>&1 | paste -sd+ - | bc) || REPO_COUNT="?"
+          REPO_COUNT=$(gh api user/repos --paginate --jq '.[]' 2>&1 | jq -s 'length') || REPO_COUNT="?"
           echo "📦 Accessible repos: **$REPO_COUNT**" >> $GITHUB_STEP_SUMMARY
 
           # Rate limit
