@@ -36,6 +36,10 @@ COPY mcp-server/ /project/mcp-server/
 COPY cli/        /project/cli/
 COPY tools/      /project/tools/
 
+# ── Non-root user ─────────────────────────────────────────────────────────
+RUN useradd -m -u 1000 appuser
+USER appuser
+
 # ── Environment ───────────────────────────────────────────────────────────
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
