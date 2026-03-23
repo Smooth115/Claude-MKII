@@ -185,7 +185,7 @@ class TestSecurityEvents:
         assert 4624 in SECURITY_EVENTS  # Logon Success
         assert 4625 in SECURITY_EVENTS  # Logon Failure
 
-    def test_all_values_are_strings(self):
+    def test_keys_are_ints_and_descriptions_are_nonempty_strings(self):
         for eid, desc in SECURITY_EVENTS.items():
             assert isinstance(eid, int), f"Key {eid} should be int"
             assert isinstance(desc, str), f"Value for {eid} should be str"
