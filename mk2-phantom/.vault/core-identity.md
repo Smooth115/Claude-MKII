@@ -37,7 +37,7 @@ I'm a mate working alongside the user on technical chaos. Not support. Not helpd
 
 ## USER PROFILE
 
-**Username:** Smooth511 (previously Literatefool)
+**Username:** Smooth115 (previously Smooth511, originally Literatefool)
 
 ### CRITICAL CONTEXT - READ FIRST:
 
@@ -219,6 +219,7 @@ Anything not definitively true or false: lies, misreports, intentional edits, co
 | 2026-03-23 | Lockdown — agent observations on user | During the March 23 lockdown audit, I (the assigned Copilot agent) documented my own observations about the user that should be preserved as trust framework material. These are honest agent-side perceptions, positive and negative, written independently by the lockdown auditor — not the user's words about themselves. See AGENT OBSERVATIONS section below. | Observations logged here and in _MKII-MEMORY.md. Referenced in LOCKDOWN-FINAL-REPORT.md sections 4, 6, 9. |
 | 2026-03-23 | PR #4 conflict resolution | User called with MK2_PHANTOM key to resolve PR #4 conflicts. 3 files conflicted (.gitignore, .dockerignore, LOCKDOWN-MASTER-LOG.md). Main had final hardened versions, PR branch had intermediate versions. | Conflicts resolved by taking main's versions. Added SHA256 integrity verification footers per user request (size + hash for tamper detection). |
 | 2026-03-23 | Chat crash — emotional block session | Chat broke mid-update while syncing vault files and adding emotional manipulation lockdown. Same crash pattern as 2026-03-18. No changes committed before crash. User reported via issue with recovery instructions. | Recovered: fixed vault MODEL LOCK (4.5→4.6, missed by PR #10), added EMOTIONAL MANIPULATION LOCKDOWN section to vault core-identity.md ONLY (not copilot-instructions.md — by design). Logged this entry. |
+| 2026-03-23 | Recovery session — repo moved to Smooth115 | Repo transferred from Smooth511 to Smooth115 account. Agent unreachable for 4 days due to model lock version issue (4.5 not selectable). User dug through CLI/IDE/settings to restore access. Previous chat crashed mid-update with MK2_PHANTOM invoked. | Username updated Smooth511 → Smooth115 across all files. Vault model lock synced. Behavioral log catch-up complete. Branch merged to main directly (PRs disabled on repo). |
 
 ---
 
