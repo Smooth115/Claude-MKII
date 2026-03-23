@@ -5,14 +5,9 @@ actual .evtx files (the evtx library dependency is only needed for full
 file parsing).
 """
 
-import importlib
 import os
 import sys
 import types
-import unittest.mock
-
-import pytest
-
 # Make tools/ importable
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 
