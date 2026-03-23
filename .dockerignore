@@ -1,3 +1,15 @@
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  ⛔ WARNING — DO NOT ADD ENTRIES TO THIS FILE WITHOUT AUTHORIZATION ⛔  ║
+# ║                                                                        ║
+# ║  This .dockerignore is LOCKED. No agent, bot, workflow, or automated   ║
+# ║  process may add, remove, or modify entries without EXPLICIT written    ║
+# ║  approval from the repository owner (Smooth115).                       ║
+# ║                                                                        ║
+# ║  Same rules as .gitignore — see Issue #3 lockdown directive.           ║
+# ║                                                                        ║
+# ║  Last authorized edit: 2026-03-23 by Copilot (Issue #3 lockdown)      ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
+
 # ── Version control ───────────────────────────────────────────────────────
 .git/
 .gitignore
