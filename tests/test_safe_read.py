@@ -2,10 +2,6 @@
 
 import os
 import sys
-import tempfile
-
-import pytest
-
 # Make tools/ importable
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 
