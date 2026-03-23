@@ -1,3 +1,10 @@
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║   DOCKER BUILD CONTEXT IGNORE                                                ║
+# ║   This file controls what gets sent to Docker daemon during builds.          ║
+# ║   It's about build performance, NOT about what gets tracked in git.          ║
+# ║   See .gitignore for repository tracking rules.                              ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
 # ── Version control ───────────────────────────────────────────────────────
 .git/
 .gitignore

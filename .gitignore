@@ -1,8 +1,30 @@
-# Parsed EVTX output (too large for repo)
+# ╔══════════════════════════════════════════════════════════════════════════════╗
+# ║                                                                              ║
+# ║   🚨🚨🚨 DO NOT ADD RANDOM SHIT HERE 🚨🚨🚨                                   ║
+# ║                                                                              ║
+# ║   This .gitignore is CURATED. Do not add entries without understanding      ║
+# ║   WHY they should be ignored. Every entry here serves a purpose.            ║
+# ║                                                                              ║
+# ║   BEFORE ADDING ANYTHING:                                                   ║
+# ║   1. Ask yourself: "Is this actually generated/temporary/sensitive?"        ║
+# ║   2. If it's evidence, logs, or investigation data - IT SHOULD BE TRACKED   ║
+# ║   3. Random IDE configs, personal prefs - CHECK WITH USER FIRST             ║
+# ║   4. If in doubt, DON'T ADD IT. Ask.                                        ║
+# ║                                                                              ║
+# ║   This file exists because of systematic security breakdown incidents.      ║
+# ║   See: POST-LOCKDOWN-REPORT-2026-03-23.md for full context.                 ║
+# ║                                                                              ║
+# ╚══════════════════════════════════════════════════════════════════════════════╝
+
+# =============================================================================
+# PARSED OUTPUT - Too large for repo, regenerated from source
+# =============================================================================
 logs/*.json
 !logs/.gitkeep
 
-# Python
+# =============================================================================
+# PYTHON - Standard build artifacts (NEVER ignore .py source files)
+# =============================================================================
 __pycache__/
 *.py[cod]
 *$py.class
@@ -12,12 +34,18 @@ __pycache__/
 dist/
 build/
 
-# Virtual environments
+# =============================================================================
+# VIRTUAL ENVIRONMENTS - Local dev only, not repo content
+# =============================================================================
 venv/
 env/
 .env
 
-# IDE
+# =============================================================================
+# IDE - Personal config only, NOT shared workspace settings
+# =============================================================================
+# Track: .vscode/mcp.json (shared MCP config)
+# Ignore: Personal local settings
 .vscode/settings.json
 .vscode/launch.json
 .vscode/tasks.json
@@ -27,10 +55,18 @@ env/
 *.swp
 *.swo
 
-# OS
+# =============================================================================
+# OS - Filesystem metadata garbage
+# =============================================================================
 .DS_Store
 Thumbs.db
 
-# Temp files
+# =============================================================================
+# TEMP FILES - Ephemeral, regenerate on demand
+# =============================================================================
 *.tmp
 *.bak
+
+# =============================================================================
+# ⚠️ DO NOT ADD BELOW THIS LINE WITHOUT EXPLICIT USER APPROVAL ⚠️
+# =============================================================================
