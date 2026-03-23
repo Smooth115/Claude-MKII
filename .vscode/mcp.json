@@ -1,0 +1,23 @@
+{
+  "servers": {
+    "claude-mk2.5": {
+      "type": "stdio",
+      "command": "python",
+      "args": ["${workspaceFolder}/mcp-server/server.py"],
+      "env": {
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "claude-mk2.5-docker": {
+      "type": "stdio",
+      "command": "docker",
+      "args": [
+        "compose",
+        "run",
+        "--rm",
+        "-T",
+        "mcp-server"
+      ]
+    }
+  }
+}

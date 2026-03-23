@@ -1,0 +1,46 @@
+# ── Version control ───────────────────────────────────────────────────────
+.git/
+.gitignore
+
+# ── Python cache ──────────────────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+.eggs/
+dist/
+build/
+*.whl
+
+# ── Virtual environments ──────────────────────────────────────────────────
+venv/
+env/
+.env
+.venv/
+
+# ── IDE / Editor ──────────────────────────────────────────────────────────
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ── OS artefacts ──────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Large binary / asset files ────────────────────────────────────────────
+assets/
+*.png
+*.PNG
+*.jpg
+*.JPG
+*.jpeg
+*.JPEG
+
+# ── Windows event log files ───────────────────────────────────────────────
+*.evtx
+
+# ── Temporary / generated files ───────────────────────────────────────────
+*.tmp
+*.bak
+logs/*.json
