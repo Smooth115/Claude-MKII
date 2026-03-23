@@ -31,6 +31,7 @@ __pycache__/
 .eggs/
 dist/
 build/
+.pytest_cache/
 
 # ── Virtual environments ─────────────────────────────────────────────────
 venv/
@@ -58,10 +59,11 @@ Thumbs.db
 # ╔══════════════════════════════════════════════════════════════════════════╗
 # ║  🔐 INTEGRITY VERIFICATION — MK2_PHANTOM AUTHORIZED                     ║
 # ╠══════════════════════════════════════════════════════════════════════════╣
-# ║  Size (bytes): 3292                                                     ║
-# ║  SHA256 (lines 1-56): 18eb49066cce4d81250a9a7c5e806f9838973e1d97bb317   ║
-# ║  Last verified: 2026-03-23T14:38:00Z by ClaudeMKII                      ║
+# ║  Size (bytes): 4579                                                     ║
+# ║  SHA256 (lines 1-57): db2f637144aa1e3b7fc2da41024742382e3b9acd99788b5   ║
+# ║  Last verified: 2026-03-23T15:20:00Z by ClaudeMKII                      ║
+# ║  Change: Added .pytest_cache/ for test suite (PR #2 content extraction) ║
 # ║                                                                         ║
-# ║  To verify: head -56 .gitignore | sha256sum                             ║
+# ║  To verify: head -57 .gitignore | sha256sum                             ║
 # ║  Any mismatch = unauthorized modification = security incident           ║
 # ╚══════════════════════════════════════════════════════════════════════════╝
