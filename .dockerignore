@@ -1,3 +1,9 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# DOCKER BUILD CONTEXT ONLY — this does NOT affect git tracking.
+# Files excluded here are simply not copied into Docker images.
+# For git tracking rules, see .gitignore.
+# ═══════════════════════════════════════════════════════════════════════════
+
 # ── Version control ───────────────────────────────────────────────────────
 .git/
 .gitignore

@@ -1,8 +1,39 @@
-# Parsed EVTX output (too large for repo)
+# ═══════════════════════════════════════════════════════════════════════════
+# 🚨  STOP.  READ THIS BEFORE TOUCHING ANYTHING BELOW.
+# ═══════════════════════════════════════════════════════════════════════════
+#
+#   This .gitignore is LOCKED DOWN.
+#
+#   DO NOT add entries here without EXPLICIT user (Smooth511) approval.
+#   DO NOT ignore evidence/, investigation/, logs/, chat-logs/, exports/,
+#       core/, mk2-phantom/, or ANY directory that holds operational data.
+#
+#   These directories contain forensic evidence, investigation logs, and
+#   operational records.  Ignoring them = destroying evidence = instant
+#   trust revocation.
+#
+#   If you think something should be ignored, raise it with the user.
+#   If you're an agent and you're "cleaning up" — this is NOT the place.
+#
+#   Last reviewed: 2026-03-23 by ClaudeMKII (lockdown compliance pass)
+#
+# ═══════════════════════════════════════════════════════════════════════════
+
+# ── PROTECTED DIRECTORIES — NEVER IGNORE THESE ───────────────────────────
+# evidence/        → forensic evidence (NEVER ignore)
+# investigation/   → analysis reports (NEVER ignore)
+# logs/            → operational logs (NEVER ignore, except parsed JSON)
+# chat-logs/       → recovered chat data (NEVER ignore)
+# core/            → framework definitions (NEVER ignore)
+# mk2-phantom/     → protected vault (NEVER ignore)
+# exports/         → GitHub data exports (NEVER ignore)
+# assets/          → screenshots, visual evidence (NEVER ignore)
+
+# ── Parsed EVTX output (too large for repo) ──────────────────────────────
 logs/*.json
 !logs/.gitkeep
 
-# Python
+# ── Python ────────────────────────────────────────────────────────────────
 __pycache__/
 *.py[cod]
 *$py.class
@@ -13,12 +44,12 @@ dist/
 build/
 .pytest_cache/
 
-# Virtual environments
+# ── Virtual environments ─────────────────────────────────────────────────
 venv/
 env/
 .env
 
-# IDE
+# ── IDE ───────────────────────────────────────────────────────────────────
 .vscode/settings.json
 .vscode/launch.json
 .vscode/tasks.json
@@ -28,10 +59,10 @@ env/
 *.swp
 *.swo
 
-# OS
+# ── OS ────────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
 
-# Temp files
+# ── Temp files ────────────────────────────────────────────────────────────
 *.tmp
 *.bak
