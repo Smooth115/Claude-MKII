@@ -1,13 +1,11 @@
 """Tests for tools/safe_read.py — the attack-pattern scanner."""
 
 import os
-import sys
-# Make tools/ importable
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 
 from safe_read import (
     MAX_CHARS_PER_LINE,
     MAX_CONSECUTIVE_BLANKS,
+    MAX_FILE_SIZE_TEXT,
     ScanResult,
     is_binary,
     safe_read,
@@ -113,8 +111,7 @@ class TestScanFileAttackPatterns:
         """Files over MAX_FILE_SIZE_TEXT should get a HIGH alert."""
         path = os.path.join(tmp_dir, "huge.txt")
         with open(path, "w") as f:
-            # Write slightly over 2 MB of normal text
-            f.write("x" * 2_000_001 + "\n")
+            f.write("x" * (MAX_FILE_SIZE_TEXT + 1) + "\n")
         result = scan_file(path)
         highs = [a for a in result.alerts if a["severity"] == "HIGH"]
         assert any("exceeds" in a["message"] for a in highs)

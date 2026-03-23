@@ -19,8 +19,7 @@ Claude-MKII/
 │   └── workflows/
 │       ├── parse-evtx.yml         # EVTX log parser
 │       ├── phantom-verify.yml     # Token verification + permissions check
-│       ├── mk2-phantom-ops.yml    # Cross-repo operations dispatch
-│       └── sync-claude-md.yml     # CLAUDE.md sync (EtK2000/CLAUDE.md-sync)
+│       └── mk2-phantom-ops.yml    # Cross-repo operations dispatch
 ├── _MKII-AGENT-ACCESS.md          # Repository access control (first-contact)
 ├── _MKII-AGENT-NOTICE.md          # Critical notices for agents
 ├── _MKII-MEMORY.md                # Agent tracking + behavioral log

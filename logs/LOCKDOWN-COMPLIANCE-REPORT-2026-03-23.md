@@ -42,7 +42,7 @@ Every post-cutoff file was authored by `copilot-swe-agent[bot]` as part of two c
 #### Commit `f56515f` — 2026-03-23T04:02:59Z
 | File | Verdict | Notes |
 |------|---------|-------|
-| `.github/workflows/sync-claude-md.yml` | ✅ Safe | Standard CLAUDE.md sync workflow using `EtK2000/CLAUDE.md-sync@v1`. Uses `actions/checkout@v4`. Permissions: `contents:write`, `pull-requests:write`. **Note:** This uses a third-party action — flagged in prior lockdown audit as security consideration but accepted by user. |
+| `.github/workflows/sync-claude-md.yml` | ⛔ REMOVED | Was a CLAUDE.md sync workflow using third-party action `EtK2000/CLAUDE.md-sync@v1` with `actions/checkout@v4`. Granted `contents:write` + `pull-requests:write`. **Removed per user directive (2026-03-23): no external access to this repository.** Ran on schedule (Monday 09:00 UTC) and manual dispatch. If sync is needed in future, user specified: import to internal sub-repo for verification, or run manually. |
 
 #### Commit `79a67ab` — 2026-03-23T05:00:26Z
 | File | Verdict | Notes |
@@ -102,7 +102,7 @@ Added clarifying header noting it controls Docker build context only, not git tr
 | Total tracked files | 148 |
 | Python source files | 4 (`cli/mk2_cli.py`, `mcp-server/server.py`, `tools/parse_evtx.py`, `tools/safe_read.py`) |
 | Test files | 4 (`tests/__init__.py`, `conftest.py`, `test_parse_evtx.py`, `test_safe_read.py`) |
-| Workflow files | 4 (`parse-evtx.yml`, `phantom-verify.yml`, `mk2-phantom-ops.yml`, `sync-claude-md.yml`) |
+| Workflow files | 3 (`parse-evtx.yml`, `phantom-verify.yml`, `mk2-phantom-ops.yml`) — `sync-claude-md.yml` removed per user directive |
 | Evidence files | 14 (in `evidence/`) |
 | Investigation files | 20+ (in `investigation/`) |
 | Log files | 6 (in `logs/`) |

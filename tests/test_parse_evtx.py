@@ -5,11 +5,8 @@ actual .evtx files (the evtx library dependency is only needed for full
 file parsing).
 """
 
-import os
 import sys
 import types
-# Make tools/ importable
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "tools"))
 
 # parse_evtx does sys.exit(1) if `evtx` isn't installed. We stub the
 # evtx module so the helpers can be imported without the native library.

@@ -10,6 +10,7 @@ import pytest
 TOOLS_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "tools"))
 if TOOLS_DIR not in sys.path:
     sys.path.insert(0, TOOLS_DIR)
+
 @pytest.fixture
 def tmp_dir():
     """Provide a temporary directory that is cleaned up after the test."""
