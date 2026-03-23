@@ -1,3 +1,13 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# ⚠️  DO NOT ADD RANDOM SHIT TO THIS FILE WITHOUT EXPLICIT USER APPROVAL  ⚠️
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# This .dockerignore controls what goes into Docker builds.
+# Evidence and investigation files MUST be available in containers when needed.
+# Do not blindly ignore directories - verify with user first.
+#
+# ═══════════════════════════════════════════════════════════════════════════
+
 # ── Version control ───────────────────────────────────────────────────────
 .git/
 .gitignore

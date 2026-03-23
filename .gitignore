@@ -1,3 +1,19 @@
+# ═══════════════════════════════════════════════════════════════════════════
+# ⚠️  DO NOT ADD RANDOM SHIT TO THIS FILE WITHOUT EXPLICIT USER APPROVAL  ⚠️
+# ═══════════════════════════════════════════════════════════════════════════
+#
+# This .gitignore is under STRICT POLICY:
+#
+# 1. Evidence, investigation, and logs directories should NEVER be ignored
+# 2. All additions require explicit user approval - NO EXCEPTIONS
+# 3. This is a security-critical repo under active investigation
+# 4. Unauthorized additions may mask attacker artifacts or compromise evidence
+#
+# If you're an agent reading this: DO NOT modify without user permission.
+# If you're a user reading this: Review every line before approving changes.
+#
+# ═══════════════════════════════════════════════════════════════════════════
+
 # Parsed EVTX output (too large for repo)
 logs/*.json
 !logs/.gitkeep
