@@ -38,6 +38,7 @@ Claude-MKII/
 ├── logs/                           # Operational logs
 ├── logs1sthour/                    # First-hour EVTX capture
 ├── tools/                          # Utilities (EVTX parser, etc.)
+├── tests/                          # Unit tests for tools
 ├── assets/images/                  # Screenshots, visual evidence
 └── exports/github-data/            # GitHub data export JSONs
 ```
