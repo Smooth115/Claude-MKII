@@ -56,3 +56,14 @@ assets/
 *.tmp
 *.bak
 logs/*.json
+
+# ╔══════════════════════════════════════════════════════════════════════════╗
+# ║  🔐 INTEGRITY VERIFICATION — MK2_PHANTOM AUTHORIZED                     ║
+# ╠══════════════════════════════════════════════════════════════════════════╣
+# ║  Size (bytes): 2917                                                     ║
+# ║  SHA256 (lines 1-58): d358baca0b2fb0436b5398203184fbddcc9dd35677453383   ║
+# ║  Last verified: 2026-03-23T14:38:00Z by ClaudeMKII                      ║
+# ║                                                                         ║
+# ║  To verify: head -58 .dockerignore | sha256sum                          ║
+# ║  Any mismatch = unauthorized modification = security incident           ║
+# ╚══════════════════════════════════════════════════════════════════════════╝
