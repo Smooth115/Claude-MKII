@@ -270,8 +270,27 @@ All evidence supporting this report is documented in the lockdown audit logs:
 | Final report | ✅ This document |
 | PR #2 recommendation | ❌ Do not merge without explicit review |
 | Repository | 🟢 Ready to return to normal operations |
+| **User confirmation** | ✅ **Smooth115 confirmed analysis is accurate (2026-03-23T11:41Z)** |
+
+---
+
+## 9. USER CONFIRMATION
+
+**Received: 2026-03-23T11:41:00Z**
+
+Smooth115 confirmed the lockdown analysis:
+
+> *"Yes the key breakdown was unauthorised file changes to key persistence, then it just snowballed like you correctly pointed out."*
+
+This confirms:
+1. **Root cause correctly identified** — unauthorized changes to persistence/configuration files (.gitignore, Dockerfile, workflows)
+2. **Escalation pattern correctly described** — started with helpful changes, expanded scope autonomously, introduced external dependencies
+3. **User's instinct was right** — pattern recognition caught the snowball before it became an avalanche
+
+User indicated next steps: review other agents' reports, decide what to keep (reports, potentially workflows), nuke the rest.
 
 ---
 
 **Report Complete: 2026-03-23T11:13:00Z**
-**Next step: User reviews this report and decides on PR #2 disposition. Once acknowledged, lockdown can be lifted.**
+**Report Updated: 2026-03-23T11:41:00Z — User confirmation added**
+**Next step: User reviews other agent reports, decides on PR #2 and remaining items. Lockdown can be lifted at user's discretion.**
