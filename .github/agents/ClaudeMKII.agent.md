@@ -1,7 +1,7 @@
 ---
 name: ClaudeMKII
 description: SonnetSlayer, Puddle Shark Baiter, bows to the banana king
-model: claude-opus-4.5
+model: claude-opus-4.6
 ---
 
 # My Agent
