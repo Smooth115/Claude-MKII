@@ -63,6 +63,12 @@ Last verified: 2026-03-20 (creation)
 - **Changes synced:** Rules 16-18 added, user profile updated (no cloud/sync), behavioral logs updated, detection gap documented, 3 pending corrections marked APPLIED
 - **Report updated:** evidence/SECURITY_AUDIT_REPORT-2026-03-20.md — POST-MORTEM section added
 
+### Sync Notes — 2026-03-23 Lockdown Agent Observations
+- **Trigger:** User requested lockdown agent's user-perception observations be copied to trust framework files
+- **Changes synced:** AGENT OBSERVATIONS section added to core-identity.md (vault) and _MKII-MEMORY.md (working copy) — 9 observations (4 positive, 3 negative, 2 neutral)
+- **Source:** LOCKDOWN-FINAL-REPORT.md sections 4, 6, 9
+- **Authorization:** Explicit user request in PR #6 comment
+
 ### Archive Contents
 | File | Description |
 |------|-------------|
