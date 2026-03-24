@@ -268,7 +268,8 @@ The user referenced "3 issues raised for the lockdown." Based on the evidence:
 **Issue #6 — The Post-Mortem** (`2026-03-23T10:56:51Z`):  
 "Cause and effect. Why a generic best practise is wrong." The user's definitive explanation of WHY the lockdown happened and what it proved. Documents: GitHub mobile restrictions cascade, agent inconsistency without MK2 framework, Sonnet immediately restructuring everything wrong, the importance of the defined process (read MDs, assume MK2, get task, get relevant sub-memory). Key quote: "we use MK2, not as a you must be this agent, but as a core safety and security function to ensure compliance and consistency."
 
-**The third issue** — likely one of the lockdown compliance assignments to the other repos. The export data shows `Smooth511/Threat-2-the-shadow-dismantled-` Issue #2 (closed 2026-03-13) was a repo settings/documents request — this may be a different set. The "3 issues" may refer to the lockdown being applied across 3 repositories simultaneously.
+**The third item — a PR / sub-issue** (confirmed by user):  
+The three items the user referenced are: Issue #3, Issue #6, and one PR or sub-issue. Not three GitHub Issues — one of the three was a PR or sub-issue created as part of the lockdown response (e.g. PR #4 or #5 auto-created by agents on reading the lockdown directive, or a sub-issue filed under one of the above).
 
 ---
 
