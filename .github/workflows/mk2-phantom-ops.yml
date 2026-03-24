@@ -14,6 +14,9 @@ on:
           - list-issues
           - health-check
           - close-stale-prs
+          - cleanup-branches
+          - cleanup-workflow-runs
+          - full-cleanup
       target_repo:
         description: 'Target repo (owner/name) — required for cross-repo-read, create-issue, list-issues'
         required: false
@@ -226,3 +229,104 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Results:** $CLOSED closed, $FAILED failed" >> $GITHUB_STEP_SUMMARY
           echo "**Completed:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+      - name: Execute — cleanup-branches
+        if: inputs.operation == 'cleanup-branches' || inputs.operation == 'full-cleanup'
+        env:
+          GH_TOKEN: ${{ secrets.MK2_PHANTOM_TOKEN }}
+          TARGET_REPO: ${{ inputs.target_repo }}
+        run: |
+          echo "## Cleanup Branches: $TARGET_REPO" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          BRANCHES=$(gh api "repos/$TARGET_REPO/branches?per_page=100" --paginate --jq '.[].name' 2>&1) || {
+            echo "❌ Failed to list branches" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          }
+
+          DELETED=0
+          FAILED=0
+          PROTECTED_BRANCHES="main"
+
+          echo "| Branch | Status |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|--------|" >> $GITHUB_STEP_SUMMARY
+
+          for BRANCH in $BRANCHES; do
+            # Skip protected branches
+            if echo "$PROTECTED_BRANCHES" | grep -qw "$BRANCH"; then
+              echo "| $BRANCH | ⏭️ Protected — skipped |" >> $GITHUB_STEP_SUMMARY
+              continue
+            fi
+
+            if gh api "repos/$TARGET_REPO/git/refs/heads/$BRANCH" -X DELETE 2>/dev/null; then
+              echo "| $BRANCH | 🗑️ Deleted |" >> $GITHUB_STEP_SUMMARY
+              DELETED=$((DELETED + 1))
+            else
+              echo "| $BRANCH | ❌ Failed |" >> $GITHUB_STEP_SUMMARY
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Results:** $DELETED deleted, $FAILED failed" >> $GITHUB_STEP_SUMMARY
+          echo "**Completed:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+      - name: Execute — cleanup-workflow-runs
+        if: inputs.operation == 'cleanup-workflow-runs' || inputs.operation == 'full-cleanup'
+        env:
+          GH_TOKEN: ${{ secrets.MK2_PHANTOM_TOKEN }}
+          TARGET_REPO: ${{ inputs.target_repo }}
+        run: |
+          echo "## Cleanup Workflow Runs: $TARGET_REPO" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Get all completed workflow runs
+          RUN_IDS=$(gh api "repos/$TARGET_REPO/actions/runs?status=completed&per_page=100" --paginate --jq '.workflow_runs[].id' 2>&1) || {
+            echo "❌ Failed to list workflow runs" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          }
+
+          DELETED=0
+          FAILED=0
+
+          for RUN_ID in $RUN_IDS; do
+            if gh api "repos/$TARGET_REPO/actions/runs/$RUN_ID" -X DELETE 2>/dev/null; then
+              DELETED=$((DELETED + 1))
+            else
+              FAILED=$((FAILED + 1))
+            fi
+          done
+
+          echo "**Results:** $DELETED workflow runs deleted, $FAILED failed" >> $GITHUB_STEP_SUMMARY
+          echo "**Completed:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
+
+      - name: Execute — full-cleanup (close issues)
+        if: inputs.operation == 'full-cleanup'
+        env:
+          GH_TOKEN: ${{ secrets.MK2_PHANTOM_TOKEN }}
+          TARGET_REPO: ${{ inputs.target_repo }}
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Close RagingbullMK Alert Issues: $TARGET_REPO" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Close issues with RagingbullMK label or title pattern
+          ISSUES=$(gh api "repos/$TARGET_REPO/issues?state=open&per_page=100" --jq '.[] | select(.title | test("RagingbullMK")) | .number' 2>&1) || {
+            echo "❌ Failed to list issues" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          }
+
+          CLOSED=0
+          for ISSUE_NUM in $ISSUES; do
+            if gh api "repos/$TARGET_REPO/issues/$ISSUE_NUM" -X PATCH -f state=closed -f state_reason=not_planned 2>/dev/null; then
+              echo "✅ Closed issue #$ISSUE_NUM" >> $GITHUB_STEP_SUMMARY
+              CLOSED=$((CLOSED + 1))
+            else
+              echo "❌ Failed to close issue #$ISSUE_NUM" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
+
+          echo "**Issues closed:** $CLOSED" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "---" >> $GITHUB_STEP_SUMMARY
+          echo "**Full cleanup completed:** $(date -u '+%Y-%m-%d %H:%M:%S UTC')" >> $GITHUB_STEP_SUMMARY
