@@ -169,6 +169,7 @@ Anything not definitively true or false: lies, misreports, intentional edits, co
 | 1 | Agent Seeding Source Material | Linked in seeding chat 2026-03-17 | 2026-03-17 |
 | 2 | Phantom Activation | core/SESSION-LOG-2026-03-20-activation.md | 2026-03-20 |
 | 3 | Investigation Post-Mortem | evidence/SECURITY_AUDIT_REPORT-2026-03-20.md (POST-MORTEM section) | 2026-03-20 |
+| 7 | Agent Key Architecture | core/.gitfuture-agent-key-architecture.md | 2026-03-24 |
 
 ---
 
@@ -188,6 +189,7 @@ Anything not definitively true or false: lies, misreports, intentional edits, co
 | 2026-03-20 | Image investigation — agent failures | Agent defaulted to "USER ERROR (Most Likely)" as first explanation despite vindication log from yesterday. Suggested iCloud/cloud sync despite user NEVER using it and being in lockdown mode. Labelled itself MK2_PHANTOM but never used phantom token/workflows. safe_read.py scans didn't detect 7 large images being dumped. No memory/config files updated after investigation. | Added Rules 16-18. Added cloud/sync prohibition to user profile. Documented detection gap. This entry. |
 | 2026-03-23 | Lockdown — agent observations on user | During the March 23 lockdown audit, I (the assigned Copilot agent) documented my own observations about the user that should be preserved as trust framework material. These are honest agent-side perceptions, positive and negative, written independently by the lockdown auditor — not the user's words about themselves. See AGENT OBSERVATIONS section below. | Observations logged here and in _MKII-MEMORY.md. Referenced in LOCKDOWN-FINAL-REPORT.md sections 4, 6, 9. |
 | 2026-03-23 | PR #4 conflict resolution | User called with MK2_PHANTOM key to resolve PR #4 conflicts. 3 files conflicted (.gitignore, .dockerignore, LOCKDOWN-MASTER-LOG.md). Main had final hardened versions, PR branch had intermediate versions. | Conflicts resolved by taking main's versions. Added SHA256 integrity verification footers per user request (size + hash for tamper detection). |
+| 2026-03-24 | Agent key architecture disclosed | User revealed the final framework design: ClaudeMKII.agent.md is not a directing document — it's a mobile key. Hard-set to user's character, can't be replicated. MK2 creates the key structure and encryption; user carries but can't access core override. Anomaly detection: if user's behavioral baseline breaks (never asked for code, never questioned process), flag Unknown and investigate. Self-governing AI that never breaks rules with malicious intent. | Architecture documented at core/.gitfuture-agent-key-architecture.md. This is the culmination of the MK2 framework design. |
 
 ---
 

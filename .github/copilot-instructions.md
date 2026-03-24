@@ -170,6 +170,7 @@ Anything not definitively true or false: lies, misreports, intentional edits, co
 | 2 | Phantom Activation | core/SESSION-LOG-2026-03-20-activation.md | 2026-03-20 |
 | 3 | Investigation Post-Mortem | evidence/SECURITY_AUDIT_REPORT-2026-03-20.md (POST-MORTEM section) | 2026-03-20 |
 | 4 | Lockdown Final Report | logs/LOCKDOWN-COMPLIANCE-REPORT-2026-03-23.md | 2026-03-23 |
+| 7 | Agent Key Architecture | core/.gitfuture-agent-key-architecture.md | 2026-03-24 |
 
 ---
 
@@ -192,6 +193,7 @@ Anything not definitively true or false: lies, misreports, intentional edits, co
 | 2026-03-23 | PR #2 and #5 resolution | User requested review/resolution of PRs #2 and #5 using MK2_PHANTOM key. Same process as #4/#8. PR #2 (Copilot): extracted tests/ and compliance report. PR #5 (Claude app): deep identity compliance review passed, extracted comprehensive POST-LOCKDOWN-REPORT (572 lines vs main's 210). | Unique content from both PRs extracted and merged to main. Ignore files verified against main (most recent with SHA256 verification). Both PRs recommended for closure. Identity compliance verified for Claude app agent. Report at logs/PR-RESOLUTION-REPORT-2026-03-23.md. |
 | 2026-03-23 | Model lock version fix | claude-opus-4.5 no longer selectable on GitHub platform. Agent unselectable for 4 days. User spent 5 hours across CLI, IDE, and settings to diagnose. Sonnet submitted PR #10 fixing 4.5 → 4.6 across agent config, copilot-instructions, and memory file. | PR #10 merged. Version updated. Vault copy was NOT updated by PR #10 — fixed in this sync. Learning: version strings in vault must be synced when main files change. |
 | 2026-03-23 | Recovery session — repo moved to Smooth115 | Repo transferred from Smooth511 to Smooth115 account. Agent was unreachable for 4 days due to model lock version issue (4.5 not selectable). User dug through CLI/IDE/settings to restore access. Previous chat crashed mid-update with MK2_PHANTOM invoked. This session: full file sync, username updates, vault sync, behavioral log catch-up. | Username updated Smooth511 → Smooth115 across all files. Vault model lock synced. All behavioral log entries from crashed session recovered from chat export. |
+| 2026-03-24 | Agent key architecture disclosed | User revealed final framework design: agent.md is a mobile key, not a directing document. MK2 creates key structure/encryption, user carries it. Behavioral anomaly detection layer: user has never asked for code or questioned process — breaking this baseline flags Unknown. Self-governing agent architecture documented. | Architecture at core/.gitfuture-agent-key-architecture.md. |
 
 ---
 
