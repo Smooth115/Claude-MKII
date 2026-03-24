@@ -1,6 +1,6 @@
 {
   "servers": {
-    "claude-mk2.5": {
+    "claude-mkii": {
       "type": "stdio",
       "command": "python",
       "args": ["${workspaceFolder}/mcp-server/server.py"],
@@ -16,7 +16,7 @@
         "NODE_ENV": "production"
       }
     },
-    "claude-mk2.5-docker": {
+    "claude-mkii-docker": {
       "type": "stdio",
       "command": "docker",
       "args": [
