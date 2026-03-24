@@ -17,7 +17,7 @@ on:
       target_repo:
         description: 'Target repo (owner/name) — required for cross-repo-read, create-issue, list-issues'
         required: false
-        default: 'Smooth511/Claude-MKII'
+        default: 'Smooth115/Claude-MKII'
       issue_title:
         description: 'Issue title (for create-issue operation)'
         required: false
@@ -66,7 +66,7 @@ jobs:
           echo "| Repository | Language | Issues | PRs | Updated |" >> $GITHUB_STEP_SUMMARY
           echo "|------------|----------|--------|-----|---------|" >> $GITHUB_STEP_SUMMARY
 
-          gh api user/repos --paginate --jq '.[] | select(.owner.login == "Smooth511") | "| [\(.name)](\(.html_url)) | \(.language // "—") | \(.open_issues_count) | — | \(.updated_at[:10]) |"' >> $GITHUB_STEP_SUMMARY 2>&1 || {
+          gh api user/repos --paginate --jq '.[] | select(.owner.login == "Smooth115") | "| [\(.name)](\(.html_url)) | \(.language // "—") | \(.open_issues_count) | — | \(.updated_at[:10]) |"' >> $GITHUB_STEP_SUMMARY 2>&1 || {
             echo "| ❌ Scan failed | - | - | - | - |" >> $GITHUB_STEP_SUMMARY
           }
 
@@ -171,8 +171,8 @@ jobs:
           # This repo status
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Claude-MKII Status" >> $GITHUB_STEP_SUMMARY
-          OPEN_ISSUES=$(gh api repos/Smooth511/Claude-MKII/issues?state=open --jq '. | length' 2>&1) || OPEN_ISSUES="?"
-          OPEN_PRS=$(gh api repos/Smooth511/Claude-MKII/pulls?state=open --jq '. | length' 2>&1) || OPEN_PRS="?"
+          OPEN_ISSUES=$(gh api repos/Smooth115/Claude-MKII/issues?state=open --jq '. | length' 2>&1) || OPEN_ISSUES="?"
+          OPEN_PRS=$(gh api repos/Smooth115/Claude-MKII/pulls?state=open --jq '. | length' 2>&1) || OPEN_PRS="?"
           echo "- Open issues: $OPEN_ISSUES" >> $GITHUB_STEP_SUMMARY
           echo "- Open PRs: $OPEN_PRS" >> $GITHUB_STEP_SUMMARY
 
