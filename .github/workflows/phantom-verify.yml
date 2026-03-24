@@ -78,7 +78,7 @@ jobs:
           echo "### Permission Check (Claude-MKII)" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
 
-          REPO="Smooth511/Claude-MKII"
+          REPO="Smooth115/Claude-MKII"
 
           # Check each permission type
           check_perm() {
