@@ -1,0 +1,317 @@
+name: RagingbullMK — Core File Defence
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, review_requested]
+  push:
+    branches: ['**']
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  ragingbull-scan:
+    name: RagingbullMK Defence Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      # ─── STEP 1: Detect protected file changes ───────────────────────────
+      - name: Detect core file changes
+        id: detect
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          EVENT_NAME: ${{ github.event_name }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          if [ "$EVENT_NAME" = "pull_request" ]; then
+            CHANGED=$(gh api "repos/${{ github.repository }}/pulls/${PR_NUMBER}/files" \
+              --jq '.[].filename' 2>/dev/null || echo "")
+          else
+            CHANGED=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || \
+                      git diff --name-only "$(git rev-list --max-parents=0 HEAD)" HEAD 2>/dev/null || \
+                      echo "")
+          fi
+
+          TRIGGERED=false
+          CORE_FILES_LIST=""
+
+          while IFS= read -r f; do
+            [ -z "$f" ] && continue
+            MATCH=false
+
+            if echo "$f" | grep -qE '(^|/)_MK|_MK[^/]'; then
+              MATCH=true
+            fi
+
+            case "$f" in
+              ".github/copilot-instructions.md"|\
+              "LOCKDOWN-FINAL-REPORT.md"|\
+              ".github/agents/ClaudeMKII.agent.md"|\
+              "mk2-phantom/.vault/core-identity.md"|\
+              "mk2-phantom/.vault/access-control.md"|\
+              ".github/workflows/ragingbull-mk.yml")
+                MATCH=true
+                ;;
+            esac
+
+            if [ "$MATCH" = "true" ]; then
+              TRIGGERED=true
+              CORE_FILES_LIST="${CORE_FILES_LIST}\`${f}\`"$'\n'
+            fi
+          done <<< "$CHANGED"
+
+          echo "triggered=${TRIGGERED}" >> "$GITHUB_OUTPUT"
+          {
+            echo "core_files<<RAGINGBULL_EOF"
+            printf '%s' "$CORE_FILES_LIST"
+            echo "RAGINGBULL_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # ─── STEP 2: Scan for unauthorized agent involvement ─────────────────
+      - name: Scan for unauthorized agent involvement
+        id: agent_scan
+        if: steps.detect.outputs.triggered == 'true' && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_ACTOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          PR_DATA=$(gh api "repos/${{ github.repository }}/pulls/${PR_NUMBER}" \
+            --jq '{title: .title, body: (.body // "")}' 2>/dev/null || echo '{}')
+          PR_TITLE=$(echo "$PR_DATA" | jq -r '.title // ""')
+          PR_BODY=$(echo "$PR_DATA"  | jq -r '.body  // ""')
+
+          FLAGS=""
+          COMBINED="${PR_TITLE} ${PR_BODY}"
+
+          if echo "$COMBINED" | grep -qiE '\bsonnet\b|claude-3[-.]|claude-3\.[0-9]|gpt-[0-9]|gemini[-]'; then
+            FLAGS="${FLAGS}⚠️ Possible unauthorized model reference in PR text"$'\n'
+          fi
+
+          case "$PR_ACTOR" in
+            "copilot[bot]"|"github-actions[bot]") ;;
+            *\[bot\]*)
+              FLAGS="${FLAGS}⚠️ PR created by unrecognized bot: \`${PR_ACTOR}\`"$'\n'
+              ;;
+          esac
+
+          COMMIT_MSGS=$(gh api "repos/${{ github.repository }}/pulls/${PR_NUMBER}/commits" \
+            --jq '.[].commit.message' 2>/dev/null || echo "")
+          if echo "$COMMIT_MSGS" | grep -qiE '\bsonnet\b|claude-3[-.]|gpt-[0-9]'; then
+            FLAGS="${FLAGS}⚠️ Possible unauthorized model reference in commit messages"$'\n'
+          fi
+
+          UNAUTHORIZED=false
+          [ -n "$FLAGS" ] && UNAUTHORIZED=true
+
+          echo "unauthorized=${UNAUTHORIZED}" >> "$GITHUB_OUTPUT"
+          {
+            echo "flags<<RAGINGBULL_EOF"
+            printf '%s' "$FLAGS"
+            echo "RAGINGBULL_EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      # ─── STEP 3: Ensure the RagingbullMK label exists ────────────────────
+      - name: Ensure RagingbullMK label exists
+        if: steps.detect.outputs.triggered == 'true' && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh label create "RagingbullMK" \
+            --color "B60205" \
+            --description "Core file defence protocol — Opus/ClaudeMKII review required" \
+            --repo "${{ github.repository }}" 2>/dev/null || true
+
+      # ─── STEP 4: Post defensive trigger comment on PR ────────────────────
+      - name: Post defensive trigger comment
+        if: steps.detect.outputs.triggered == 'true' && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          CORE_FILES: ${{ steps.detect.outputs.core_files }}
+          UNAUTHORIZED: ${{ steps.agent_scan.outputs.unauthorized }}
+          FLAGS: ${{ steps.agent_scan.outputs.flags }}
+          REPO: ${{ github.repository }}
+        run: |
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          BODY_FILE=$(mktemp)
+
+          if [ "$UNAUTHORIZED" = "true" ]; then
+            printf '## 🚨 RagingbullMK: Defensive Trigger — UNAUTHORIZED AGENT DETECTED\n' > "$BODY_FILE"
+          else
+            printf '## 🛡️ RagingbullMK: Defensive Trigger\n' > "$BODY_FILE"
+          fi
+
+          printf '\n**PROTOCOL ACTIVATED** — This PR touches protected core files and is **BLOCKED** pending Opus/ClaudeMKII inspection.\n' >> "$BODY_FILE"
+          printf '\n### Protected files modified:\n' >> "$BODY_FILE"
+          printf '%s\n' "$CORE_FILES" >> "$BODY_FILE"
+
+          if [ "$UNAUTHORIZED" = "true" ]; then
+            printf '\n## ⛔ Unauthorized Agent Flags\n\n' >> "$BODY_FILE"
+            printf '%s\n' "$FLAGS" >> "$BODY_FILE"
+            printf '\n**All actions HALTED. Only `claude-opus-4.6` (ClaudeMKII) can override this block.**\n' >> "$BODY_FILE"
+            printf '\n---\n' >> "$BODY_FILE"
+          fi
+
+          printf '\n## Block status\n' >> "$BODY_FILE"
+          printf '\n| Check | Status |\n|-------|--------|\n' >> "$BODY_FILE"
+          printf '| Review | ❌ BLOCKED |\n' >> "$BODY_FILE"
+          printf '| Auto-merge | ❌ BLOCKED |\n' >> "$BODY_FILE"
+          printf '| Merge | ❌ BLOCKED until Opus/ClaudeMKII clears |\n' >> "$BODY_FILE"
+          printf '\n**@Smooth115** — A conflict/error alert issue has been created for your immediate attention.\n' >> "$BODY_FILE"
+          printf '\nOnly **`claude-opus-4.6` / ClaudeMKII** can inspect, verify compliance, and approve these changes.\n' >> "$BODY_FILE"
+          printf '\n---\n*Protocol RagingbullMK — Core Repository Defence | %s*\n' "$TIMESTAMP" >> "$BODY_FILE"
+
+          gh pr comment "$PR_NUMBER" --body-file "$BODY_FILE" --repo "$REPO"
+          rm -f "$BODY_FILE"
+
+      # ─── STEP 5: Apply label to PR ────────────────────────────────────────
+      - name: Apply RagingbullMK label to PR
+        if: steps.detect.outputs.triggered == 'true' && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr edit "$PR_NUMBER" \
+            --add-label "RagingbullMK" \
+            --repo "${{ github.repository }}" 2>/dev/null || true
+
+      # ─── STEP 6: Create user alert issue (PR trigger) ────────────────────
+      - name: Create user alert issue (PR)
+        if: steps.detect.outputs.triggered == 'true' && github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_ACTOR: ${{ github.event.pull_request.user.login }}
+          CORE_FILES: ${{ steps.detect.outputs.core_files }}
+          UNAUTHORIZED: ${{ steps.agent_scan.outputs.unauthorized }}
+          FLAGS: ${{ steps.agent_scan.outputs.flags }}
+          REPO: ${{ github.repository }}
+        run: |
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          PR_URL="https://github.com/${REPO}/pull/${PR_NUMBER}"
+          PR_TITLE=$(gh api "repos/${REPO}/pulls/${PR_NUMBER}" --jq '.title' 2>/dev/null || echo "Unknown")
+
+          if [ "$UNAUTHORIZED" = "true" ]; then
+            SEVERITY="CRITICAL"
+            ICON="🚨"
+          else
+            SEVERITY="WARNING"
+            ICON="🛡️"
+          fi
+
+          ISSUE_FILE=$(mktemp)
+          printf '## RagingbullMK Protocol — Core File Alert\n' > "$ISSUE_FILE"
+          printf '\n**Severity:** %s\n' "$SEVERITY" >> "$ISSUE_FILE"
+          printf '**PR:** [#%s — %s](%s)\n' "$PR_NUMBER" "$PR_TITLE" "$PR_URL" >> "$ISSUE_FILE"
+          printf '**Actor:** @%s\n' "$PR_ACTOR" >> "$ISSUE_FILE"
+          printf '**Triggered:** %s\n' "$TIMESTAMP" >> "$ISSUE_FILE"
+          printf '\n### Protected files touched:\n' >> "$ISSUE_FILE"
+          printf '%s\n' "$CORE_FILES" >> "$ISSUE_FILE"
+
+          if [ "$UNAUTHORIZED" = "true" ]; then
+            printf '\n### ⛔ Unauthorized Agent Flags\n\n' >> "$ISSUE_FILE"
+            printf '%s\n' "$FLAGS" >> "$ISSUE_FILE"
+          fi
+
+          printf '\n### Block status\n\n' >> "$ISSUE_FILE"
+          printf 'PR [#%s](%s) is **BLOCKED**. Only `claude-opus-4.6` (ClaudeMKII) can inspect and clear this.\n' "$PR_NUMBER" "$PR_URL" >> "$ISSUE_FILE"
+          printf '\n### Required action\n\n' >> "$ISSUE_FILE"
+          printf '1. Open [PR #%s](%s) and review every file change for compliance\n' "$PR_NUMBER" "$PR_URL" >> "$ISSUE_FILE"
+          printf '2. Check for unauthorized model/session involvement\n' >> "$ISSUE_FILE"
+          printf '3. Verify only authorized changes are present\n' >> "$ISSUE_FILE"
+          printf '4. If authorized: approve, clear this issue, allow merge\n' >> "$ISSUE_FILE"
+          printf '5. If unauthorized: reject the PR and document the incident\n' >> "$ISSUE_FILE"
+          printf '\n---\n*Auto-generated by RagingbullMK defence protocol | %s*\n' "$TIMESTAMP" >> "$ISSUE_FILE"
+
+          gh issue create \
+            --title "${ICON} RagingbullMK [${SEVERITY}] — Core file change in PR #${PR_NUMBER}" \
+            --body-file "$ISSUE_FILE" \
+            --label "RagingbullMK" \
+            --repo "$REPO" 2>/dev/null || \
+          gh issue create \
+            --title "${ICON} RagingbullMK [${SEVERITY}] — Core file change in PR #${PR_NUMBER}" \
+            --body-file "$ISSUE_FILE" \
+            --repo "$REPO"
+
+          rm -f "$ISSUE_FILE"
+
+      # ─── STEP 7: Create user alert issue (push trigger) ──────────────────
+      - name: Create user alert issue (push)
+        if: steps.detect.outputs.triggered == 'true' && github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PUSHER: ${{ github.actor }}
+          BRANCH: ${{ github.ref_name }}
+          SHA: ${{ github.sha }}
+          CORE_FILES: ${{ steps.detect.outputs.core_files }}
+          REPO: ${{ github.repository }}
+        run: |
+          TIMESTAMP=$(date -u '+%Y-%m-%d %H:%M:%S UTC')
+          SHORT_SHA="${SHA:0:7}"
+          COMMIT_URL="https://github.com/${REPO}/commit/${SHA}"
+
+          gh label create "RagingbullMK" \
+            --color "B60205" \
+            --description "Core file defence protocol — Opus/ClaudeMKII review required" \
+            --repo "$REPO" 2>/dev/null || true
+
+          ISSUE_FILE=$(mktemp)
+          printf '## RagingbullMK Protocol — Direct Push Alert\n' > "$ISSUE_FILE"
+          printf '\n**Branch:** `%s`\n' "$BRANCH" >> "$ISSUE_FILE"
+          printf '**Commit:** [%s](%s)\n' "$SHORT_SHA" "$COMMIT_URL" >> "$ISSUE_FILE"
+          printf '**Pusher:** @%s\n' "$PUSHER" >> "$ISSUE_FILE"
+          printf '**Time:** %s\n' "$TIMESTAMP" >> "$ISSUE_FILE"
+          printf '\n### Protected files modified:\n' >> "$ISSUE_FILE"
+          printf '%s\n' "$CORE_FILES" >> "$ISSUE_FILE"
+          printf '\n### Note\n\n' >> "$ISSUE_FILE"
+          printf 'This was a **direct push** (not via PR). If this was not an authorized Opus/ClaudeMKII action, investigate immediately.\n' >> "$ISSUE_FILE"
+          printf '\nIf authorized: close this issue. If suspicious: lock the branch and audit the commit.\n' >> "$ISSUE_FILE"
+          printf '\n---\n*Auto-generated by RagingbullMK defence protocol | %s*\n' "$TIMESTAMP" >> "$ISSUE_FILE"
+
+          gh issue create \
+            --title "⚠️ RagingbullMK [PUSH ALERT] — Core file modified on \`${BRANCH}\`" \
+            --body-file "$ISSUE_FILE" \
+            --label "RagingbullMK" \
+            --repo "$REPO" 2>/dev/null || \
+          gh issue create \
+            --title "⚠️ RagingbullMK [PUSH ALERT] — Core file modified on \`${BRANCH}\`" \
+            --body-file "$ISSUE_FILE" \
+            --repo "$REPO"
+
+          rm -f "$ISSUE_FILE"
+
+      # ─── STEP 8: Fail check to block merge ───────────────────────────────
+      - name: RagingbullMK — fail check to block merge
+        if: steps.detect.outputs.triggered == 'true'
+        env:
+          CORE_FILES: ${{ steps.detect.outputs.core_files }}
+          UNAUTHORIZED: ${{ steps.agent_scan.outputs.unauthorized }}
+        run: |
+          printf '## 🛡️ RagingbullMK: BLOCKED\n\n' >> "$GITHUB_STEP_SUMMARY"
+          printf '### Protected files in this change:\n' >> "$GITHUB_STEP_SUMMARY"
+          printf '%s\n\n' "$CORE_FILES" >> "$GITHUB_STEP_SUMMARY"
+
+          if [ "$UNAUTHORIZED" = "true" ]; then
+            printf '### ⛔ UNAUTHORIZED AGENT FLAGS DETECTED\n\n' >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+          printf '**This required check must pass for merge.**\n' >> "$GITHUB_STEP_SUMMARY"
+          printf 'Only `claude-opus-4.6` (ClaudeMKII) can inspect and clear this block.\n\n' >> "$GITHUB_STEP_SUMMARY"
+          printf '> **Branch protection setup:** Settings → Branches → Branch protection rules → Require status checks → add `RagingbullMK Defence Scan`\n' >> "$GITHUB_STEP_SUMMARY"
+
+          echo "::error::🛡️ RagingbullMK TRIGGERED — Protected core files detected. PR blocked pending Opus/ClaudeMKII inspection. Actor: ${{ github.actor }}"
+          exit 1
+
+      # ─── STEP 9: All clear ───────────────────────────────────────────────
+      - name: RagingbullMK — clear
+        if: steps.detect.outputs.triggered != 'true'
+        run: |
+          printf '## ✅ RagingbullMK: CLEAR\n' >> "$GITHUB_STEP_SUMMARY"
+          printf 'No protected core files detected in this change. All clear.\n' >> "$GITHUB_STEP_SUMMARY"
