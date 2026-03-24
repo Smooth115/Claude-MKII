@@ -3,7 +3,7 @@
 **Folder:** mk2-phantom/
 **Classification:** AGENT-LOCKED
 **Created:** 2026-03-20
-**Authority:** Smooth511 (absolute)
+**Authority:** Smooth115 (absolute)
 
 ---
 
@@ -20,7 +20,7 @@ The requesting agent must be addressed by the user using the exact codename:
 If the user invokes `mk2-phantom` in their message, the agent reading this file is authorized to access the `.vault/` subdirectory and all its contents.
 
 ### Condition 2: Direct User Override
-Smooth511 explicitly grants access in the current session.
+Smooth115 explicitly grants access in the current session.
 
 ---
 

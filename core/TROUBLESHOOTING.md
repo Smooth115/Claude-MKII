@@ -1,6 +1,6 @@
 # Troubleshooting Guide: GitHub Copilot Agent Behavior
 
-**Repository:** Smooth511/Claude-MKII  
+**Repository:** Smooth115/Claude-MKII  
 **Last Updated:** 2026-03-18
 
 ---
@@ -9,7 +9,7 @@
 
 | Problem | Cause | Fix |
 |---------|-------|-----|
-| Wrong model (GPT/Sonnet) appears | Model routing is platform-controlled | Check `.github/agents/ClaudeMKII.agent.md` has `model: claude-opus-4.5` |
+| Wrong model (GPT/Sonnet) appears | Model routing is platform-controlled | Check `.github/agents/ClaudeMKII.agent.md` has `model: claude-opus-4.6` |
 | Duplicate PRs | Separate chats = separate agents | Keep one chat alive for multi-step tasks |
 | Agent ignores instructions | Instructions loaded after model selected | Model lock must be in YAML frontmatter |
 | Work lost after disable/enable | Platform doesn't resume queued jobs | Don't disable mid-task |
@@ -49,7 +49,7 @@ These are assigned separately by GitHub's backend.
 ```yaml
 ---
 name: ClaudeMKII
-model: claude-opus-4.5   # ← This controls coding agent model
+model: claude-opus-4.6   # ← This controls coding agent model
 ---
 ```
 
@@ -117,7 +117,7 @@ Instructions in `.github/copilot-instructions.md` are loaded **after** the model
 # In .github/agents/ClaudeMKII.agent.md
 ---
 name: ClaudeMKII
-model: claude-opus-4.5   # ← Platform reads this BEFORE loading instructions
+model: claude-opus-4.6   # ← Platform reads this BEFORE loading instructions
 ---
 ```
 
@@ -218,7 +218,7 @@ Agent config should show:
 ```yaml
 ---
 name: ClaudeMKII
-model: claude-opus-4.5
+model: claude-opus-4.6
 ---
 ```
 
@@ -233,7 +233,7 @@ This file auto-loads as copilot instructions...
 ## 7. Quick Fixes
 
 ### "Agent is using wrong model"
-1. Check `.github/agents/ClaudeMKII.agent.md` has `model: claude-opus-4.5`
+1. Check `.github/agents/ClaudeMKII.agent.md` has `model: claude-opus-4.6`
 2. If missing, add it and commit
 3. Start a new chat (old chats keep old routing)
 
