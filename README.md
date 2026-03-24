@@ -1,6 +1,6 @@
 # mk2-phantom (Claude-MKII)
 
-Custom autonomous agent framework for Smooth511. Seeded 2026-03-17. Codename assigned 2026-03-20.
+Custom autonomous agent framework for Smooth115. Seeded 2026-03-17. Codename assigned 2026-03-20.
 
 **Identifier:** ClaudeMKII-Seed-20260317
 **Codename:** mk2-phantom
