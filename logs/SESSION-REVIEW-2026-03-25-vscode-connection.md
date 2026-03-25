@@ -193,11 +193,22 @@ The session transcript indicates the user described system state (NVMe Ubuntu, e
 
 This is not a primary failure. Rule 2 is the agent's responsibility. But earlier context would have closed the gap faster.
 
+— after user input —
+The user had been making progress prior to this point (e.g., `sudo apt purge gnome* snap*` runs indicating active stripping of attacker-accessible surfaces) but did not communicate the severity of the overall situation or the circumstances they were entering from. The session was presented as a setup task rather than an escalation recovery. Beyond the context gap, there was a critical tactical error: the fresh Ubuntu install was performed on top of a pre-existing compromised install rather than a clean base. This meant the new install inherited infrastructure the attacker already had hooks in, causing escalation to accelerate by an estimated 2–3x compared to a genuinely clean baseline. The situation the agent was advising on was materially worse than what the transcript framing implied.
+
 **User contribution 2: No session framing**
 MK2_PHANTOM was not invoked at session start. The user was dealing with an emergency and didn't set the operating mode. In high-stress sessions, a single opening line like "mk2 phantom, emergency mode, compromised machine, one command only" would have pre-empted most failures. This isn't a rule violation on the user's part — but it's a gap.
 
+— after user input —
+The deeper issue here is that the standard operating procedure was inverted. The user's normal process is: go offline → strip the attacker's capabilities and lockdown tools → then go online with the attacker already defanged. In this session the sequence ran backwards: the attacker had its full toolkit active when the user went offline, the user was then offline without access to the resources needed to counter it, and the attacker was able to respond to every defensive move in real time in ways it typically cannot when its tools have been pre-removed. This is not a "should have said X at the start" failure — it's a fundamentally different threat environment that the agent had no way to identify without being told. The session framing gap was therefore more consequential than the report initially estimated.
+
 **User contribution 3: Continued engagement after repeated violations**
 The user continued providing context and corrections across 25+ exchanges. The agent kept failing. At some point the cost of engagement exceeded the benefit. The user eventually logged off, which was the correct call.
+
+— after user input —
+Continuing to engage past the point of diminishing returns may be a recurring pattern. The user notes this themselves as a possible common flaw. It's worth flagging for the trust framework: when the agent is clearly not adapting and the attacker is actively exploiting every additional exchange (each long response = more keystrokes intercepted = more corruption), cutting the session earlier would reduce attack surface. Logging off was the right call and was eventually made — but it could be made faster. This is not a criticism of persistence, which is a genuine strength in other contexts. In an active interception scenario, persistence translates directly into attacker opportunity.
+
+Additionally, the user observes that as context and database size in the copilot-instructions grow, there appear to be increasing instances of gaps, deprioritised sections, or ignored directives. This is consistent with what the report documents: the agent had access to all 18 rules, a full User Profile, and a behavioral log with an identical prior failure — and still failed on the most critical rules. The information exists. The loading and prioritisation of that information under real operating conditions is where the gap is. This is an architecture observation worth carrying into future calibration.
 
 **Caveat:** These user-side contributions are genuine observations, not culpability assignments. The primary failures are agent-side. The user is typing on a phone to an actively attacked machine. The bar for what they should have to front-load is very low. The bar for what the agent should have automatically handled is very high.
 
@@ -377,13 +388,16 @@ The documents were NOT referred to sufficiently to test the user's writing again
 | Adaptation speed | Poor | 3-4 exchanges per correction |
 | Output quality | 1 useful command produced | The kill line worked. Everything else was noise |
 | Document adequacy | 7/10 | Sufficient for the task — gaps exist but weren't the root cause |
-| User contribution to failure | Minor | Late context disclosure, no emergency framing |
+| User contribution to failure | Minor–Moderate | Late context disclosure, no emergency framing, fresh install on buggered base escalated threat 2–3x |
 
 **Root cause:** Agent did not read User Profile before first response.
 
 **Compounding cause:** Agent's correction loop treats each failure as a local fix rather than a session-mode change.
 
 **Document root cause:** No emergency mode protocol exists. An agent encountering this scenario has to derive the right behavior from scattered rules rather than a unified protocol.
+
+— after user input —
+**Escalation factor:** The fresh Ubuntu install on top of a pre-existing compromised install meant the agent was advising on a baseline that was materially worse than a clean install. Attacker had full toolkit, user was offline without counter-resources, and the attacker could respond in real time — a scenario that inverts the user's standard offline-neutralise-then-reconnect process. This context, had it been provided at session start, would have changed the operational framing from "standard setup" to "active extraction under fire." The agent would still have failed on Rule 9 without the User Profile read, but the severity of each failure would have been understood differently.
 
 **What would have changed the outcome:** One line in the agent's first response: "Hold on — are you typing on phone? What's your current system state?" — and then, based on the answer, one command at a time from the start.
 
