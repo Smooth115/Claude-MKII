@@ -2,6 +2,8 @@
 
 **This is the single point of contact.** Post here if you don't know where else to put it. Agents check this file at session start.
 
+Related: #37
+
 ---
 
 ## How to Use

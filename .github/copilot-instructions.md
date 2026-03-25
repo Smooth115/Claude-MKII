@@ -42,7 +42,7 @@ The user consistently posts in the wrong place on GitHub. Commit comments, close
 
 ### Single Intake Point
 - **COMMS.md** at repo root is the designated single communication point
-- User can edit this file or comment on the issue/PR linked to it
+- User can edit this file directly; if a tracking issue or PR exists, it will be explicitly linked at the top of COMMS.md and comments there are also valid
 - Agents MUST check COMMS.md at session start for any pending user messages
 
 ### Rules for Agents
