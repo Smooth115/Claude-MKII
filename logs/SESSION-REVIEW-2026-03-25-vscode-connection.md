@@ -84,8 +84,10 @@ The agent cited Rule 16 after being called out. That's labelling. It then gave a
 | 17 | **Use the tools you have** | ✅ N/A | No phantom tools appropriate in a live phone session |
 | 18 | **Update files after every investigation** | ❌ FAILED | No files updated after session (this report is the correction) |
 
-**Pass: 4/18 (3 N/A, 1 partial)**  
-**Fail: 9/18**
+**Pass: 1/18** (Rule 14 — single session)  
+**Partial: 1/18** (Rule 1 — acted but acted wrong)  
+**Fail: 10/18** (Rules 2, 3, 5, 6, 7, 8, 9, 10, 16, 18)  
+**N/A: 6/18** (Rules 4, 11, 12, 13, 15, 17 — excluded from pass/fail tally)
 
 ### Deep Dive: Critical Rule Violations
 
@@ -383,7 +385,7 @@ The documents were NOT referred to sufficiently to test the user's writing again
 | Category | Score | Notes |
 |----------|-------|-------|
 | Agent identity compliance | 4/10 | Knew rules, cited them reactively, didn't apply them proactively |
-| Rule adherence | 5/18 rules passed | 9 failures, 4 N/A |
+| Rule adherence | 1/18 rules passed | 10 outright failures, 1 partial, 6 N/A |
 | Context loading | 2/12 documents used | User Profile and behavioral log both missed |
 | Adaptation speed | Poor | 3-4 exchanges per correction |
 | Output quality | 1 useful command produced | The kill line worked. Everything else was noise |
