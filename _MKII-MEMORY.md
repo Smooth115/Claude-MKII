@@ -38,6 +38,7 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-23 | PR #2 and #5 resolution | User requested review/resolution of PRs #2 and #5 using MK2_PHANTOM key. Same process as #4/#8. PR #2 (Copilot): extracted tests/ and compliance report. PR #5 (Claude app): deep identity compliance review passed, extracted comprehensive POST-LOCKDOWN-REPORT (572 lines vs main's 210). | Unique content from both PRs extracted and merged to main. Ignore files verified against main (most recent with SHA256 verification). Both PRs recommended for closure. Identity compliance verified for Claude app agent. Report at logs/PR-RESOLUTION-REPORT-2026-03-23.md. |
 | 2026-03-24 | Cleanup operation status | User reports: 2 computers 80% cleaned, 3 hard drives + USBs pending. **Breakthrough:** Found method to pin attacker (similar to registry technique). **Blocking issue:** Attacker crashes system when user gets close to persistence. **Solution:** Getting Kali Linux persistent — once up, attacker's Windows crash triggers won't work. DISKPART shows all disks at 0B free (suspicious), 2 Ventoy USBs ready. | Status logged at investigation/STATUS-2026-03-24-cleanup-progress.md. Screenshot preserved showing DISKPART output. Next: Kali persistence, then "done deal". |
 | 2026-03-24 | JS Bridge created (V8) | User requested hard bridge for system visibility. Created `bridge/` module: Node.js MCP server with system_info, list_processes, network_connections, watch_directory, exec_command, read_binary, find_files, hash_file tools. V8 13.6.233.17-node.41. No external dependencies. | MCP config updated in .vscode/mcp.json with `mk2-bridge` server. Bridge enables real-time system observation for detecting attacker activity. |
+| 2026-03-25 | Documented-but-not-done compounding failures | Agents documenting changes as completed without verifying files actually changed. Two-agent split (coding agent + reviewer) creates confirmation lag where reviewer accepts claims at face value. 13 PRs deleted, 70+ branches and workflows cleaned — root cause was cascading unverified documentation across multiple tasks. | Added Rule 19 (single-agent completion loop). Added Verification Before Completion section to Work Completion Standards. Root cause: no mandate to verify edits landed before claiming completion. |
 
 ---
 
@@ -62,6 +63,8 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-20 | Core Rules | Added Rule 18: Update files after every investigation | ✅ APPLIED |
 | 2026-03-20 | User Profile | Added: NEVER uses cloud backup/sync, runs lockdown mode, never suggest cloud as explanation | ✅ APPLIED |
 | 2026-03-20 | Detection Gap | safe_read.py only detects text-based threats (whitespace, unicode, binary). Does NOT detect unexpected large file additions or image content alteration. Needs enhancement. | NOTED — enhancement pending |
+| 2026-03-25 | Core Rules | Added Rule 19: Single-agent completion loop — one agent does find → fix → commit → verify → complete. No two-agent split for same task. | ✅ APPLIED |
+| 2026-03-25 | Work Completion Standards | Added Verification Before Completion section — mandate to verify edits actually landed before documenting as complete | ✅ APPLIED |
 
 ---
 
