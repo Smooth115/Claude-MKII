@@ -3,7 +3,8 @@
 **Date:** 2026-03-20  
 **Analyst:** ClaudeMKII (MK2_PHANTOM activated)  
 **Trigger:** User reported image submission discrepancy — submitted 0kb files + clearer log screenshots to pics/pics1 folders, but repo contains key deletion screenshots instead. Nothing user submitted appeared.  
-**Scope:** ALL checks available — repo integrity, commit forensics, image metadata, workflow tampering, secrets exposure, branch analysis
+**Scope:** ALL checks available — repo integrity, commit forensics, image metadata, workflow tampering, secrets exposure, branch analysis  
+**See also:** `logs/image-batch-commit-failure-2026-03-25.md` — focused diagnostic report with recovery plan
 
 ---
 
