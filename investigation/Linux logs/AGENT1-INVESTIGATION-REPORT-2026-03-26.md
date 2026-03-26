@@ -264,10 +264,15 @@ Per `UEFI-MOK-KERNEL-EVIDENCE-2026-03-26.md`: SKI `d939395cda059c19a699c85f3856d
 
 1. **Dump MokListRT directly from EFI variables:**
    ```bash
-   hexdump -C /sys/firmware/efi/efivars/MokListRT-605dab50-e046-4300-abb6-3dd810dd8b23 > /tmp/MokListRT.hex
-   cp /tmp/MokListRT.hex /home/lloyd/
+   cat /sys/firmware/efi/efivars/MokListRT-605dab50-e046-4300-abb6-3dd810dd8b23 > /tmp/MokListRT.raw && hexdump -C /tmp/MokListRT.raw | tee /tmp/MokListRT.hex | head -60
    ```
-   This bypasses `mokutil` and reveals all enrolled MOK keys and their full certificates.
+   ⚠️ **Why `cat` first, not direct `hexdump`:** EFI variable pseudo-files return `EINVAL` on `lseek()` — `hexdump` calls `lseek` internally and fails with "Invalid argument". `cat` reads sequentially (no seek), writes to a regular file, then `hexdump` works on that. Direct `hexdump /sys/firmware/...` will always fail.
+   
+   **After running:** copy the raw file to home before rebooting:
+   ```bash
+   cp /tmp/MokListRT.raw /home/lloyd/MokListRT.raw
+   ```
+   This bypasses `mokutil` entirely and reveals all enrolled MOK keys and their full certificates.
 
 2. **Export CN=grub cert as DER:**
    ```bash
