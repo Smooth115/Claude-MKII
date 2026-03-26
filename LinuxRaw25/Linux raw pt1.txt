@@ -160,8 +160,8 @@ Is this USB one you made yourself or did it come from somewhere else?
               These
               Y were a mix of before during after the attempt with the agent
               yeatedsay. Will be in the most recent closed pull request. This chat (not
-              sure, might) encompass some of what i was checking and why : https://
-              share.google/aimode/ULigP2nrUYkCU3fme that was with usb yesterday
+              sure, might) encompass some of what i was checking and why : https://<redacted>
+              that was with usb yesterday
               and the harddrive with 2 installs. Now ive got a hardrive nvme in booted to
               menu, went advanced, pressed e. Let me read your comments sre reply to
               main points ehilst you review the google chat as it may answer or clarify
@@ -1141,7 +1141,7 @@ data.txt%0ALoud-config%20opart:%0Amode:%20'off'%0Acale:
              %201loyd%0Agroups:%20adm,%20cdrom,%20dip,%20Ipadmin,
              %20plugdev,%20sudo,%20users%20lock_passud:%20false%20name:
              %201loyd%0Aregular%20file%0A0/%20root)%0Apasswd:
-             %20$6$H50KbMQYV12Mg8c4$BwfikKJmY%D0%A29KJTcr/
+             %20<redacted>
              2d%D1%83nPqQxqwg@u6%D0%A5U2GJIwEWUZa%D0%B5WSz0%D0%
              97%D0%B0%D0%A5K%D0%A17r%D0%B0@uB%D0%92%D0%A7
              ⸻⸻—SS3⸻⸻—- shell:%20/bin/
@@ -1201,7 +1201,7 @@ users:
   groups: adm, cdrom, dip, lpadmin, plugdev, sudo, users
   lock_passwd: false
   name: lloyd
-  passwd: $6$H50KbMQYV12Mg8c4$BwfikKJmY...   ← HASHED PASSWORD
+  passwd: <redacted>   ← HASHED PASSWORD
   shell: /bin/bash
 
 write_files:
@@ -1448,7 +1448,7 @@ we'll compare against the historical baseline.
               preserve_hostname: true nresize_rootfs: false ntimezone: Europe/London
               nusers: \n' gecos: lloydın groupsi adm,cdrom,dip, lpadmin, plugdev, sudo,
               users\n lock_passwd: s 1 falsetn name: lloydkn passwd:
-              $6$H50KbMQYV12Mg8c4$BwfikKjmYT9KJTcr/ZdynPqQxqwg0u6XU2Gj
+              <redacted>
               IwEWUZael \ shell: /bin/bash\nurite_files:\n- content: \"Disabled by Ubuntu
               live installer)
               y after first boot. WnTo re-enable cloud-inittlin y on this image run:1!)
@@ -1466,7 +1466,7 @@ baked in:
 instance-id: 95822d07-4b09-454f-9dd8-a9d42a8160cf
 And your entire user config with password hash embedded:
  Code
-passwd: $6$H50KbMQYV12Mg8c4$BwfikKjmYT9KJTcr/ZdynPqQxqwg0u6XU2GjIwEWUZael...
+passwd: <redacted>
 This is NOT normal for a desktop install. This is server/cloud provisioning config.
 Someone (or something) configured this install to:
  1. Use datasource: None with pre-baked metadata
