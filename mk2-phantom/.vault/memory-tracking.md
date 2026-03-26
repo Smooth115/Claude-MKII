@@ -14,6 +14,8 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 1 | Agent Seeding Source Material | Linked in seeding chat 2026-03-17: tcp_udp_defense_hunt.md, malware_defense_report.md, incident_3_blackout.md, lenovo_ideapad_attack.md, incident_report.md | 2026-03-17 |
 | 2 | Phantom Activation | core/SESSION-LOG-2026-03-20-activation.md | 2026-03-20 |
 | 3 | Investigation Post-Mortem | evidence/SECURITY_AUDIT_REPORT-2026-03-20.md (POST-MORTEM section) | 2026-03-20 |
+| 4 | Space Chat Session Context | mk2-phantom/.vault/session-logs/SESSION-CONTEXT-2026-03-25-space-chat.md | 2026-03-25 |
+| 5 | The War So Far — History Report | mk2-phantom/.vault/history/THE-WAR-SO-FAR.md | 2026-03-25 |
 
 ---
 
@@ -34,6 +36,8 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-20 | Phantom activation | User completed ALL credential rotation: sessions revoked, new passkey, new 2FA backup codes, cleared everything. MK2_PHANTOM_TOKEN stored. Phone is only active session. Attacker's session hijack tokens invalidated. | Created phantom-verify.yml and mk2-phantom-ops.yml workflows. Activation session logged at core/SESSION-LOG-2026-03-20-activation.md |
 | 2026-03-20 | Image investigation — process failures | Previous agent: (1) Defaulted to "USER ERROR" as first explanation despite vindication-log principle from 2026-03-19. (2) Suggested iCloud/cloud sync — user NEVER uses it, was in lockdown with bg refresh off. (3) Labelled itself MK2_PHANTOM in report header but never invoked phantom token or workflows. (4) safe_read.py didn't detect 7 large images dumped to repo. (5) Updated ZERO memory/config/vault files after investigation. | Added Rules 16-18 to core spec. Added cloud/sync prohibition to user profile. Documented detection gap. Updated behavioral logs. Synced vault. User called it out correctly — THIRD time agent defaulted to user error when it shouldn't have. |
 | 2026-03-25 | Communication protocol (Issue #37) | User consistently posts in wrong place on GitHub (commit comments, wrong PRs, etc.) causing work to stall. Agents don't see input and everything grinds to a halt. | Added Rule 19: User posts in wrong places — always respond. Created USER COMMUNICATION PROTOCOL section in core spec. Created COMMS.md as single intake point. Synced to vault. |
+| 2026-03-25 | Vault push — Space Chat session context | MK2_PHANTOM authorized. Full session context from Copilot Space chat stored: chain of custody, identity resolution, framework philosophy, sub-agent restructuring plan, outstanding orders, offline gap summary. | Created mk2-phantom/.vault/session-logs/SESSION-CONTEXT-2026-03-25-space-chat.md. Memory refs #4 and #5 added. |
+| 2026-03-25 | DATABASE repo raid — History report | Read entire Smooth115/DATABASE repo (MASTER_REPORT 37KB, SECURITY_AUDIT 31KB, Linux Log Analysis 40KB, 10+ investigation files). Wrote fun history report covering Jan–Mar 20 2026. | Created mk2-phantom/.vault/history/THE-WAR-SO-FAR.md (22KB). Covers ghost admin, PushButtonReset hijack, DISM+Synergy, 2-minute surveillance, IPv6 Mini4 Tank, Linux battles, 13-hour Windows battle. |
 
 ---
 

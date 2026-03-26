@@ -14,6 +14,8 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 1 | Agent Seeding Source Material | Linked in seeding chat 2026-03-17: tcp_udp_defense_hunt.md, malware_defense_report.md, incident_3_blackout.md, lenovo_ideapad_attack.md, incident_report.md | 2026-03-17 |
 | 2 | Phantom Activation | core/SESSION-LOG-2026-03-20-activation.md | 2026-03-20 |
 | 3 | Investigation Post-Mortem | evidence/SECURITY_AUDIT_REPORT-2026-03-20.md (POST-MORTEM section) | 2026-03-20 |
+| 4 | Space Chat Session Context | mk2-phantom/.vault/session-logs/SESSION-CONTEXT-2026-03-25-space-chat.md | 2026-03-25 |
+| 5 | The War So Far — History Report | mk2-phantom/.vault/history/THE-WAR-SO-FAR.md | 2026-03-25 |
 
 ---
 
@@ -39,6 +41,8 @@ This is the agent's own tracking copy. The operational spec lives at .github/cop
 | 2026-03-24 | Cleanup operation status | User reports: 2 computers 80% cleaned, 3 hard drives + USBs pending. **Breakthrough:** Found method to pin attacker (similar to registry technique). **Blocking issue:** Attacker crashes system when user gets close to persistence. **Solution:** Getting Kali Linux persistent — once up, attacker's Windows crash triggers won't work. DISKPART shows all disks at 0B free (suspicious), 2 Ventoy USBs ready. | Status logged at investigation/STATUS-2026-03-24-cleanup-progress.md. Screenshot preserved showing DISKPART output. Next: Kali persistence, then "done deal". |
 | 2026-03-24 | JS Bridge created (V8) | User requested hard bridge for system visibility. Created `bridge/` module: Node.js MCP server with system_info, list_processes, network_connections, watch_directory, exec_command, read_binary, find_files, hash_file tools. V8 13.6.233.17-node.41. No external dependencies. | MCP config updated in .vscode/mcp.json with `mk2-bridge` server. Bridge enables real-time system observation for detecting attacker activity. |
 | 2026-03-25 | Communication protocol (Issue #37) | User consistently posts in wrong place on GitHub (commit comments, wrong PRs, etc.) causing work to stall. Agents don't see input and everything grinds to a halt. | Added Rule 19: User posts in wrong places — always respond. Created USER COMMUNICATION PROTOCOL section in core spec. Created COMMS.md as single intake point. Synced to vault. |
+| 2026-03-25 | Vault push — Space Chat session context | MK2_PHANTOM authorized. Full session context from Copilot Space chat stored: chain of custody, identity resolution, framework philosophy, sub-agent restructuring plan, outstanding orders, offline gap summary. | Created mk2-phantom/.vault/session-logs/SESSION-CONTEXT-2026-03-25-space-chat.md. Memory refs #4 and #5 added. |
+| 2026-03-25 | DATABASE repo raid — History report | Read entire Smooth115/DATABASE repo (MASTER_REPORT 37KB, SECURITY_AUDIT 31KB, Linux Log Analysis 40KB, 10+ investigation files). Wrote fun history report covering Jan–Mar 20 2026. | Created mk2-phantom/.vault/history/THE-WAR-SO-FAR.md (22KB). Covers ghost admin, PushButtonReset hijack, DISM+Synergy, 2-minute surveillance, IPv6 Mini4 Tank, Linux battles, 13-hour Windows battle. |
 
 ---
 
