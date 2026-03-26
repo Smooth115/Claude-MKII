@@ -368,7 +368,7 @@ Combined: **firmware-rooted persistence** with a self-signed CA certificate that
 
 | Item | Priority | Notes |
 |------|----------|-------|
-| MOK NVRAM hexdump | HIGH 🔴 | `MokListRT` raw contents not yet captured |
+| MOK NVRAM hexdump | **PARTIAL ✅** | First cert extracted (skip=48): **Canonical Ltd. Master CA** — publicly known Ubuntu shim vendor cert, presence is NORMAL. Suspicious `CN=grub` cert is a separate entry at `skip=1172`. See MOKLIST-HEXDUMP-ANALYSIS-2026-03-26.md |
 | DSDT dump | HIGH 🔴 | Needed to analyze non-standard I/O port claims (`0x0680–0x06ff`, `0x077a`) and WMI methods |
 | Full MOK key count | HIGH 🔴 | `mokutil` refusing to enumerate — count unknown |
 | `tmokbd.ImaRb` origin | MEDIUM 🟡 | `/run/` is tmpfs; reference injected dynamically; source not traced |
@@ -401,6 +401,8 @@ Combined: **firmware-rooted persistence** with a self-signed CA certificate that
 | 14 | Audio driver binding during SIGTERM | MEDIUM 🟡 | ✅ YES | Code executing at shutdown |
 | 15 | Phantom keyboard map `/run/tmokbd.ImaRb` | MEDIUM 🟡 | ❌ Per-boot | Injected dynamically into tmpfs |
 | 16 | AMD PSP active | MEDIUM 🟡 | ✅ YES | Sub-OS; opaque |
+
+| 17 | Canonical Ltd. Master CA in MokListRT (skip=48) | NORMAL 🟢 | ✅ YES | Expected Ubuntu shim vendor cert. Two certs confirmed in MOK store — CN=grub still at large (skip=1172) |
 
 ---
 
