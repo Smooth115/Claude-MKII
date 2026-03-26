@@ -2,7 +2,7 @@
 
 ## Issue: OCR-Corrupted Certificate Data
 
-The certificate data shown in Issue #[number] contains OCR errors from photographing a terminal screen. The certificate cannot be recovered from the corrupted base64 text alone because too many characters have been misrecognized.
+The certificate data shown in Smooth115/Claude-MKII#45 contains OCR errors from photographing a terminal screen. The certificate cannot be recovered from the corrupted base64 text alone because too many characters have been misrecognized.
 
 ## Known Certificate Details (from UEFI-MOK-KERNEL-EVIDENCE-2026-03-26.md)
 

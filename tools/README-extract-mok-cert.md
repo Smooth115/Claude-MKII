@@ -198,8 +198,8 @@ If `mokutil --list-enrolled` returns help text instead of executing:
 
 ## Related Documentation
 
-- [MOK Certificate Extraction Guide](investigation/Linux%20logs/MOK-CERT-EXTRACTION-GUIDE.md)
-- [UEFI MOK Evidence Report](investigation/Linux%20logs/UEFI-MOK-KERNEL-EVIDENCE-2026-03-26.md)
+- [MOK Certificate Extraction Guide](../investigation/Linux%20logs/MOK-CERT-EXTRACTION-GUIDE.md)
+- [UEFI MOK Evidence Report](../investigation/Linux%20logs/UEFI-MOK-KERNEL-EVIDENCE-2026-03-26.md)
 
 ## Security Notes
 

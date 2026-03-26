@@ -18,8 +18,6 @@ Usage:
 
 import sys
 import argparse
-import re
-import struct
 from pathlib import Path
 
 
@@ -49,9 +47,6 @@ def clean_ocr_base64(text):
         '—': '-',
         '\xa0': '',  # non-breaking space
 
-        # Common OCR confusions
-        'l': 'I',  # lowercase L to uppercase I in context
-        'tI': 'MI',  # common OCR error at start
     }
 
     cleaned = text
@@ -81,6 +76,40 @@ def clean_ocr_base64(text):
             cleaned_lines.append(line)
 
     return '\n'.join(cleaned_lines)
+
+
+def parse_der_length(data):
+    """
+    Parse DER-encoded length and return (content_length, header_length).
+
+    DER length encoding:
+    - Short form (< 0x80): length is in this byte, header is tag + 1 byte
+    - Long form (>= 0x80): lower 7 bits encode number of following length bytes
+
+    Raises ValueError if data is too short or declared length exceeds buffer.
+    """
+    if len(data) < 2:
+        raise ValueError("Invalid DER: insufficient data")
+
+    len_byte = data[1]
+
+    if len_byte & 0x80 == 0:
+        # Short form
+        content_len = len_byte
+        header_len = 2
+    else:
+        num_len_bytes = len_byte & 0x7F
+        if len(data) < 2 + num_len_bytes:
+            raise ValueError("Invalid DER length: insufficient data for long-form length")
+        length_bytes = data[2:2 + num_len_bytes]
+        content_len = int.from_bytes(length_bytes, byteorder="big")
+        header_len = 2 + num_len_bytes
+
+    total_len = header_len + content_len
+    if total_len > len(data):
+        raise ValueError("Invalid DER length: declared length exceeds available data")
+
+    return content_len, header_len
 
 
 def extract_from_raw_binary(input_file, skip_bytes=48):
@@ -113,17 +142,10 @@ def extract_from_raw_binary(input_file, skip_bytes=48):
             # Extract from DER start
             cert_data = cert_data[der_start:]
 
-            # Parse DER length to extract exact certificate
-            # DER format: tag (1 byte) + length (1-4 bytes) + content
-            if len(cert_data) > 4:
-                # For long form: 0x82 means length is in next 2 bytes
-                if cert_data[1] == 0x82:
-                    cert_len = struct.unpack('>H', cert_data[2:4])[0] + 4
-                elif cert_data[1] == 0x83:
-                    cert_len = struct.unpack('>I', b'\x00' + cert_data[2:5])[0] + 5
-                else:
-                    cert_len = cert_data[1] + 2
-
+            # Parse DER length to extract exactly one certificate
+            if len(cert_data) > 2:
+                content_len, header_len = parse_der_length(cert_data)
+                cert_len = header_len + content_len
                 cert_data = cert_data[:cert_len]
 
         return cert_data
@@ -149,7 +171,12 @@ def extract_from_efi_var(input_file):
             der_start = data.find(b'\x30\x83')
 
         if der_start >= 0:
-            return data[der_start:]
+            cert_data = data[der_start:]
+            # Parse DER length to return exactly one certificate
+            if len(cert_data) > 2:
+                content_len, header_len = parse_der_length(cert_data)
+                cert_data = cert_data[:header_len + content_len]
+            return cert_data
 
         return data
 
