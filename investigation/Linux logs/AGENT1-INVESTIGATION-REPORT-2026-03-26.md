@@ -274,10 +274,41 @@ Per `UEFI-MOK-KERNEL-EVIDENCE-2026-03-26.md`: SKI `d939395cda059c19a699c85f3856d
    ```
    This bypasses `mokutil` entirely and reveals all enrolled MOK keys and their full certificates.
 
-2. **Export CN=grub cert as DER:**
+2. **Parse MokListRT.raw — extract the embedded X.509 certificate (run this now):**
+
+   **Step A — quick readable text scan:**
    ```bash
-   # If mokutil --export starts working or via direct NVRAM read
-   openssl x509 -inform DER -in grub.der -out grub.pem -text
+   strings /home/lloyd/MokListRT.raw
+   ```
+   This will immediately print any readable strings in the file — Subject, Issuer, CN=grub, serial number, etc.
+
+   **Step B — extract the full X.509 cert details:**
+   ```bash
+   dd if=/home/lloyd/MokListRT.raw bs=1 skip=48 2>/dev/null | openssl x509 -inform DER -text -noout
+   ```
+   The EFI variable layout is: 4 bytes attributes + 16 bytes signature type GUID + 4 bytes list size + 4 bytes header size + 4 bytes sig size = 32 bytes header, then 16 bytes owner GUID = 48 bytes total to skip before the DER cert starts. If this shows `unable to load certificate`, try:
+   ```bash
+   dd if=/home/lloyd/MokListRT.raw bs=1 skip=32 2>/dev/null | openssl x509 -inform DER -text -noout
+   ```
+   (Some implementations omit the 16-byte owner GUID.)
+
+   **Step C — save the cert as PEM for later submission:**
+   ```bash
+   dd if=/home/lloyd/MokListRT.raw bs=1 skip=48 2>/dev/null | openssl x509 -inform DER -out /home/lloyd/mokcert.pem && cat /home/lloyd/mokcert.pem
+   ```
+   The `cat` at the end prints the base64 PEM block — photograph/transcribe this for CT log submission later.
+
+   **Step D — count how many certs are enrolled (total key count):**
+   ```bash
+   hexdump -C /home/lloyd/MokListRT.raw | grep -c "30 82"
+   ```
+   `30 82` is the ASN.1 DER sequence header for certs. Count = number of enrolled MOK certificates.
+
+3. **Export CN=grub cert as DER:**
+   ```bash
+   # If openssl extraction above worked, grub.pem is already at /home/lloyd/mokcert.pem
+   # To convert back to DER for reference:
+   openssl x509 -in /home/lloyd/mokcert.pem -outform DER -out /home/lloyd/mokcert.der
    ```
    For submission to CT logs and independent analysis.
 
