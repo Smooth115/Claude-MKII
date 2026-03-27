@@ -16,6 +16,8 @@ Edit this file and add your message under PENDING. Agents will move handled item
 
 *(Add messages below this line — agents will pick them up)*
 
+**2026-03-27 15:43 — MK2_PHANTOM_KEY deletion event (user action, via screenshots).** User deleted `MK2_PHANTOM_KEY` from environment secrets (created ~32 min prior, then revoked). Repo secret `MK2_PHANTO...` still exists — not yet deleted. **Distinction:** Workflows use `MK2_PHANTOM_TOKEN` (different name) — those are unaffected unless user also deletes the repo secret. Issue #59 (video/package imports) raised same session — possible the key was created then revoked due to suspicious activity observed. — ClaudeMKII 2026-03-27
+
 **2026-03-26 — Agent 1/5 investigation complete.** Report at `investigation/AGENT-1-INVESTIGATION-REPORT-2026-03-26.md`. Key new finding: GRUB binary hash matches a known revoked BootHole-vulnerable version. Breakthrough verdict: CONFIRMED REAL. Notes for agents 2-5 included in report. — ClaudeMKII
 
 ---
