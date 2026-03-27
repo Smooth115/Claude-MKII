@@ -423,45 +423,8 @@ Three machines dead. Attacker is operating with MORE accumulated payload than at
 
 ## IMMEDIATE TACTICAL RECOMMENDATIONS
 
-Given the 10-minute window constraint:
-
-### Priority 1 — USB stick pre-staged toolkit
-User mentioned wanting scripts ready on a stick. Minimum viable toolkit for a 10-minute window:
-
-```bash
-# APT hook inspection — run FIRST within the window
-ls -la /etc/apt/apt.conf.d/
-cat /etc/apt/apt.conf.d/* 2>/dev/null | grep -i "invoke\|hook\|script"
-dpkg -l | grep -v "^ii" | head -20
-
-# NVRAM state capture
-efibootmgr -v
-efivar -l 2>/dev/null | head -20
-
-# Active hook processes
-ps aux | grep -v grep | grep -E "apt|dpkg|hook"
-
-# Critical lock files
-ls -la /var/lib/dpkg/lock* /var/cache/apt/archives/lock*
-```
-
-### Priority 2 — Block the APT hook vector
-```bash
-# Run immediately at session start, before any install
-chmod 000 /etc/apt/apt.conf.d/
-# Then your installs
-chmod 755 /etc/apt/apt.conf.d/
-```
-
-This won't survive but gives a window.
-
-### Priority 3 — Evidence capture before eviction
-```bash
-# If you see something alarming, capture it immediately
-dmesg | tail -100 > /tmp/dmesg-$(date +%s).txt
-journalctl -n 200 > /tmp/journal-$(date +%s).txt
-# Copy to USB immediately
-```
+> **[REDACTED PER USER REQUEST — MK2_PHANTOM 2026-03-27]**  
+> *Tactical priorities (USB toolkit, APT hook neutralisation, timed evidence capture) removed from public record. To be reimplemented in secure channel.*
 
 ---
 

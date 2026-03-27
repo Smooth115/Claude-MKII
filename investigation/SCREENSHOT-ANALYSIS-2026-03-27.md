@@ -330,66 +330,17 @@ Systemd user units (Apr 19 symlink — user-level persistence at login)
 
 *Issue #53 asks: "sbin/chroot, sbin/switch_root, pivot, lschroot — what's the play? Can I yoink them? Boot, purge, download data? Remote agent access?"*
 
-### Option 1: Yoink them (copy to locked folder) — YES, DO THIS
-**From a live USB, not the running system.** The running system's tools may be compromised. Steps:
-```bash
-# Boot Ubuntu live USB — do NOT boot the installed OS
-# Mount NVMe partition read-only:
-mount -o ro /dev/nvme0n1p2 /mnt
-
-# Extract the initramfs (whichever path):
-mkdir /tmp/initramfs-out
-cd /tmp/initramfs-out
-zcat /mnt/boot/initrd.img-6.8.0-41-generic | cpio -idmv
-
-# Hash and copy all suspicious binaries to external USB:
-sha256sum bin/lschroot bin/xsetroot sbin/chroot sbin/pivot_root sbin/switch_root
-cp bin/lschroot bin/xsetroot sbin/chroot sbin/pivot_root sbin/switch_root /media/usb-safe/
-
-# Also copy the xrdp backdoor:
-cp /mnt/etc/xdg/Xwayland-session.d/00-xrdp /media/usb-safe/
-
-# Also recover .dpkg-old originals:
-find /mnt -name "*.dpkg-old" -exec cp --parents {} /media/usb-safe/ \;
-```
-This gives you the attacker's binaries for analysis without triggering anything.
-
-### Option 2: Boot, purge — RISKY WITHOUT PREP
-**APT hooks are compromised.** Running `sudo apt purge` from the infected OS will trigger the attacker's own APT hooks. The attacker's hook will fire BEFORE the purge completes and will attempt to reinstall.
-
-**Safe approach from live USB first:**
-```bash
-# Remove APT hooks (from live USB while mounted read-write):
-mount /dev/nvme0n1p2 /mnt
-ls /mnt/etc/apt/apt.conf.d/         # find attacker hooks
-ls /mnt/etc/initramfs-tools/hooks/  # find initramfs hooks
-# Remove anything you didn't install
-# THEN reboot into installed OS and purge
-```
-
-### Option 3: Internet + data dump in 10-minute window
-Given the 10-minute eviction window, prioritise in this order:
-1. `sha256sum /boot/initrd.img-* /boot/vmlinuz-*` → paste to phone photo
-2. `ls -la /etc/apt/apt.conf.d/ /etc/initramfs-tools/hooks/ /etc/xdg/Xwayland-session.d/` → paste to phone photo
-3. `efibootmgr -v` → NVRAM state
-4. Only then browser/data dump if time remains
-
-### Option 4: Remote agent access / "VS Code ragingbull style"
-Cannot do live remote access from this environment. However: if you can export the attacker binaries (lschroot, xsetroot, switch_root) to a separate clean machine and upload them here, they can be analysed in detail — strings extracted, function calls mapped, what they actually DO identified. That's "stealing its secrets."
-
-**The most valuable thing to steal right now is the binaries themselves + the 00-xrdp script (175 bytes — readable, will tell exactly what it launches).**
+> **[REDACTED PER USER REQUEST — MK2_PHANTOM 2026-03-27]**  
+> *Tactical recovery options (4 Options: binary extraction, APT hook neutralisation, timed data capture, remote analysis) removed from public record. To be reimplemented in secure channel.*
 
 ---
 
 ## Recovery Note — `.dpkg-old` Files
 
-The `.dpkg-old` originals (Images 1+4) were NOT deleted — they were displaced. From a live USB:
-1. Find them: `find /mnt -name "*.dpkg-old" 2>/dev/null`
-2. Compare against current: `diff /mnt/etc/initramfs-tools/initramfs.conf /mnt/etc/initramfs-tools/initramfs.conf.dpkg-old`
-3. Restore: `cp file.dpkg-old file` (for each displaced original)
-4. Rebuild initramfs from live USB (not from installed system): `chroot /mnt update-initramfs -u -k all`
+The `.dpkg-old` originals (Images 1+4) were NOT deleted — they were displaced. The originals still exist on disk and are recoverable. A recovery path exists that can break the APT hook rebuild loop without requiring a full partition wipe, targeting tiers 3–6 while leaving tiers 1–2 (firmware) intact.
 
-**This breaks the APT hook rebuild loop without requiring a full partition wipe. Does not clean tiers 1–2 (firmware) but eliminates the rebuild mechanism.**
+> **[REDACTED PER USER REQUEST — MK2_PHANTOM 2026-03-27]**  
+> *Specific recovery commands removed from public record. To be reimplemented in secure channel.*
 
 ---
 
