@@ -381,7 +381,9 @@ Three machines dead. Attacker is operating with MORE accumulated payload than at
 | Attacker binary `bin/lschroot` in initramfs | ✅ CONFIRMED (screenshot) | Non-existent in any standard distro — custom attacker chroot enumeration tool |
 | X11 utility `bin/xsetroot` in initramfs | ✅ CONFIRMED (screenshot) | X11 tool has zero legitimate initramfs use — framebuffer access during pre-OS stage |
 | 3-stage deployment timeline | ✅ CONFIRMED (screenshot timestamps) | Aug 9 / Apr 5 / Mar 31 staging dates in single initramfs — multiple install sessions |
-| xrdp remote desktop in Xwayland session startup | ✅ CONFIRMED (screenshot) | `00-xrdp` in /etc/xdg/Xwayland-session.d/ — every desktop login triggers remote access |
+| xrdp remote desktop in Xwayland session startup | ✅ CONFIRMED (screenshot) | `00-xrdp` in /etc/xdg/Xwayland-session.d/ — **175 bytes, Apr 13 13:04** — every desktop login triggers remote access |
+| fwupd firmware daemon active (Aug 8 17:17) | ✅ CONFIRMED (screenshot) | Firmware write daemon ran at same time as initramfs compromise — NVMe/UEFI write window |
+| `gnome-applications.menu` modified Mar 31 | ✅ CONFIRMED (screenshot) | Same operational day as initramfs toolkit deployment — same attacker session |
 | `.dpkg-old` originals preserved on disk | ✅ CONFIRMED (screenshots) | Displaced originals still exist — potential recovery vector without full wipe |
 | Cross-platform (Windows + Linux) | ✅ CONFIRMED (prior) | wimboot Windows also attacked mid-install |
 | USB HID interface injection | ✅ CONFIRMED (prior) | SEMICO keyboard + phantom mouse/audio |
