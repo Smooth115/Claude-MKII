@@ -20,7 +20,7 @@ The Linux boot chain investigation reveals conclusive evidence of firmware-level
 
 **Pre-staged persistence infrastructure** on a claimed "fresh install" (AppArmor profiles for uninstalled software, SSH authorized_keys ready for injection, sssd authentication deliberately weakened) proves the install was never clean.
 
-This links directly to Windows-side evidence: **Synergy running during DISM**, **PushButtonReset hijack with UID watermark 33554432**, **MIG controller manipulation**, and **Downloads folder surveillance**. The MOK certificate could have been enrolled during the DISM deployment phase when the attacker had real-time human control (Synergy KVM presence confirmed). Once enrolled, it controls **both** Windows and Linux boot chains forever.
+This links directly to Windows-side evidence: **Synergy running during DISM**, **PushButtonReset hijack with UID watermark 33554432**, **MIG controller manipulation**, and **Downloads folder surveillance**. The MOK certificate could have been enrolled during the DISM deployment phase when the attacker had real-time human control (Synergy KVM presence confirmed). Once enrolled in UEFI NVRAM, it controls the **Linux** boot chain (shim → GRUB → kernel) across all reinstalls. The Windows-side persistence operates via a parallel mechanism (see MASTER_REPORT.md); MOK enrollment itself is specific to the Linux shim trust chain and does not directly govern Windows Secure Boot's PK/KEK/db validation.
 
 ---
 
@@ -42,7 +42,7 @@ The breakthrough occurred during a live forensic session on 2026-03-26 where the
 
 1. **Boot journal analysis** revealed **three different kernel build strings** from the same kernel version
 2. **EFI memory map comparison** showed 10 additional MMIO entries in second boot vs first boot
-3. **Certificate enumeration** (`mokutil --db`) revealed the self-signed `CN=grub` certificate in MOK
+3. **Certificate enumeration** (`mokutil --list-enrolled`) revealed the self-signed `CN=grub` certificate in MOK
 4. **Audio driver binding during shutdown** caught code executing at SIGTERM phase
 5. **Pre-staged infrastructure** discovery (AppArmor, SSH, sssd) on "fresh" install
 
@@ -365,14 +365,16 @@ The Linux boot chain compromise **directly connects** to Windows-side attack evi
 3. Attacker reboots to MOK Manager (Blue UEFI screen)
 4. **Enrolls `CN=grub` certificate** via `mokutil --import` or manual MOK Manager enrollment
 5. Certificate persists in NVRAM forever
-6. Attacker can now sign:
+6. Attacker can now sign binaries trusted by the **Linux shim/MOK chain**:
    - Modified GRUB bootloaders
-   - Modified kernel binaries
-   - Kernel modules
+   - Modified kernel binaries (passed through shim → GRUB → kernel)
+   - Kernel modules (via MOK key registered with kernel keyring)
    - Recovery environment kernels
-7. Secure Boot trusts all of the above because they're signed by MOK cert
+7. Linux Secure Boot (shim) trusts signed binaries because MOK cert is in the shim trust store
 
-**This is the bridge.** One certificate, enrolled once, controls **both** Windows and Linux boot chains forever.
+**Note on Windows:** MOK is consumed solely by the Linux shim boot flow and does **not** grant direct trust in Windows Secure Boot's PK/KEK/db chain. Windows trusts binaries signed by keys in the UEFI `db` variable, not the MOK list. The attacker's impact on Windows likely relies on a separate mechanism — enrollment of a key into `db`/KEK, replacement of a trusted EFI application in the boot order, or a firmware-level bootkit that operates below both OS trust chains. The evidence for Windows-side boot chain control is documented separately in MASTER_REPORT.md (Synergy/DISM phase) and is **not** directly explained by MOK enrollment alone.
+
+**This is the Linux-side bridge.** One MOK certificate, enrolled once in UEFI NVRAM, controls the **Linux** boot chain (shim → GRUB → kernel) across all reinstalls. The Windows-side persistence operates through a parallel mechanism that requires further verification.
 
 ---
 
@@ -384,7 +386,7 @@ Per the ClaudeMKII framework: *"Everything is true or false at root. Cannot be b
 
 | Statement | Evidence | Confidence |
 |-----------|----------|-----------|
-| Self-signed MOK certificate exists in NVRAM | Journal load, `mokutil --db` output | 100% TRUE |
+| Self-signed MOK certificate exists in NVRAM | Journal load, `mokutil --list-enrolled` output | 100% TRUE |
 | Certificate predates install by 7 years | Cert validity: Feb 2019, install: Mar 2026 | 100% TRUE |
 | Certificate has CA:TRUE + Code Signing | X.509 extensions in certificate dump | 100% TRUE |
 | Three kernel build strings from one version | Boot 1/Boot 2 journals + /proc/version | 100% TRUE |
@@ -462,12 +464,23 @@ Per the ClaudeMKII framework: *"Everything is true or false at root. Cannot be b
    # Count X.509 certificate structures in output
    ```
 
-6. **Extract and submit CN=grub certificate to transparency logs** 🟡 MEDIUM
+6. **Extract CN=grub certificate and publish fingerprints via realistic channels** 🟡 MEDIUM
    ```bash
-   mokutil --export  # If it works
-   # OR extract DER from hexdump output
-   # Submit to crt.sh, Google CT logs
-   # Creates public record
+   mokutil --export  # If it works; look for the CN=grub entry
+   # OR extract the CN=grub cert DER blob from the MokListRT hexdump output
+
+   # Convert DER to PEM and derive fingerprints/hashes
+   openssl x509 -in mok_grub.der -inform DER -out mok_grub.pem
+   openssl x509 -noout -fingerprint -sha256 -in mok_grub.pem
+   sha256sum mok_grub.der mok_grub.pem
+
+   # Store artifacts and share appropriately:
+   # - Commit DER/PEM + fingerprints to the incident-response repo / case files
+   # - Provide to vendor/security contacts or CSIRT as part of the report
+   # - Optionally upload to a malware/certificate-sharing platform (per policy)
+   #
+   # Optional: use crt.sh / CT frontends to SEARCH by fingerprint,
+   # but note that non-TLS firmware/MOK certificates are unlikely to be present.
    ```
 
 7. **Flash BIOS from official HP source on clean machine** 🔴 CRITICAL
