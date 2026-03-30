@@ -614,9 +614,11 @@ FollowTxt.txt establishes a **6th persistence tier** — eBPF runtime persistenc
 
 ### Gaps Closed
 
-- **G7** (Runtime persistence): eBPF injection into PID 1 = CLOSED
-- **G8** (Tool evasion mechanism): show_fdinfo hooks + BPF filter masquerade = CLOSED  
-- **G9** (Cross-kernel module loading): mfd_aaeon from 6.17 loaded on system = CLOSED
+- **Runtime persistence gap (FG1):** eBPF injection into PID 1 = CLOSED
+- **Tool evasion mechanism gap (FG2):** show_fdinfo hooks + BPF filter masquerade = CLOSED  
+- **Cross-kernel module loading gap (FG3):** mfd_aaeon from 6.17 loaded on system = CLOSED
+
+> Note: These are tagged FG1–FG3 (FollowTxt-only gap tags) to avoid conflicting with the existing G1–G12 numbering in the Gap Analysis report, where G7–G9 have different definitions.
 
 ---
 
