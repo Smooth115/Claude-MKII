@@ -19,7 +19,7 @@ Throughout all of this, we had **pieces** — powerful individual findings that 
 
 **TheLink.txt fills most major gaps.** It is the live forensic transcript that shows the rootkit **in operation**, being investigated layer by layer from a BusyBox shell. It connects the Windows evidence to the Linux evidence to the firmware evidence into a more coherent attack architecture.
 
-> ⚠️ DRAFT NOTE: After user review, 10 of 12 gaps are closed. Gaps G10 (attacker fingerprint) and G12 (active exfiltration) remain partially open. Several findings from the initial analysis were corrected: yoink.txt is the user's file, /dev/nmen1p3 was OCR error, dead.letter contains rkhunter log, and the 256MB reference is about EFI MMIO range not System.map. All findings need cross-referencing against backing investigations before this document can be a source of truth.
+> ⚠️ DRAFT NOTE: After user review, 9 of 12 gaps are closed. Gaps G6 (C2 communication — /dev/queue is only a candidate with inferential purpose), G10 (attacker fingerprint) and G12 (active exfiltration) remain partially open. Several findings from the initial analysis were corrected: yoink.txt is the user's file, /dev/nmen1p3 was OCR error, dead.letter contains rkhunter log, and the 256MB reference is about EFI MMIO range not System.map. **NEW:** 5 screenshots posted 2026-03-30 — screenshot 2 shows Jynx rootkit name in certificate strings (needs full analysis). All findings need cross-referencing against backing investigations before this document can be a source of truth.
 
 This report maps every gap that existed before TheLink.txt, and shows how the new evidence addresses each one.
 
@@ -192,7 +192,7 @@ Before TheLink.txt, these were the open questions:
 
 ---
 
-### G6: How Does the Rootkit Communicate Out? ✅ CLOSED
+### G6: How Does the Rootkit Communicate Out? ⚠️ PARTIALLY OPEN
 
 **Before:** Suspected C2 capability but no channel identified.
 
@@ -360,7 +360,7 @@ Layer 4: Host kernel (6.8.0-41 on root_backup, ~261-byte stub System.map)
     ↓ survives: kernel updates (attacker intercepts via APT hooks)
 Layer 5: Accumulated state (root_backup, /dev/queue, dpkg state)
     ↓ maintains golden image for reset-on-reboot
-    ↓ provides C2 channel and data staging
+    ↓ likely maintains C2/data-staging layer (candidate; evidence primarily inferential)
 ```
 
 ### On Windows (Jan–Mar 2026)
@@ -382,7 +382,7 @@ Layer 5: Accumulated state (root_backup, /dev/queue, dpkg state)
 - Changes reset on reboot from root_backup golden image
 
 ### Cross-Platform Evidence
-- **Same attacker** — English speaker, uses colloquial slang, makes spelling errors in code
+- **Same attacker** — English speaker, uses colloquial slang
 - **Same persistence anchor** — MOK cert in NVRAM controls both Windows and Linux boot chains
 - **Same NVMe firmware** — hidden storage protected at hardware level regardless of OS
 - **Same surveillance model** — real-time monitoring (Windows: Downloads folder, Linux: /dev/queue needs cross-ref)
@@ -398,11 +398,12 @@ Even with TheLink.txt, some gaps remain:
 | 1 | **Cross-referencing all findings** | 🔴 HIGH | Every finding in these drafts has 3–6 backing investigations. Need systematic cross-ref before promoting to source of truth |
 | 2 | **256MB MMIO + 261-byte System.map cross-reference** | 🔴 HIGH | **NEEDS DEDICATED PR.** Cross-reference: (a) EFI MMIO range 0xe0000000-0xefffffff jumping mem48→mem58 between boots, (b) ~261-byte System.map stub on shadow partition, (c) UEFI-MOK report Finding 3, (d) Linux Raw pt2 e820/EFI analysis. Question: Is the 256MB MMIO entity the firmware-managed address space where the host kernel loads from? |
 | 3 | **Contents of ntfs_3g script** | 🔴 HIGH | User needs to capture during interrupted boot (BusyBox shell): `cat /scripts/local-premount/ntfs_3g` |
-| 4 | **"Emu" folder contents** | 🟡 MEDIUM | `ls -la /n1p1/root_backup/boot/Emu/` — emulation profiles would help clarify hypervisor theory |
-| 5 | **System.map actual file size verification** | 🟡 MEDIUM | `ls -la /n1p1/root_backup/boot/System.map*` — user says ~261 bytes. Verify exact size. A real System.map is 1.5–2MB; 261 bytes = stub/decoy. |
-| 6 | **Full /proc/mounts output** | 🟡 MEDIUM | For complete mount analysis |
-| 7 | **/dev/queue investigation** | 🟡 MEDIUM | Cross-reference against standard Linux to determine if this is normal or anomalous |
-| 8 | **CodeSmooth files analysis** | 🟡 MEDIUM | `customecvry.txt` and `toextract.txt` in the repo — additional chat logs from related sessions |
+| 4 | **Full analysis of 5 new screenshots** | 🔴 HIGH | User posted 5 screenshots to PR #65 as "defined truths." Screenshot 2 shows **Jynx rootkit** name embedded in certificate strings — if confirmed, adds LD_PRELOAD rootkit layer to attack model. Needs full visual analysis. |
+| 5 | **"Emu" folder contents** | 🟡 MEDIUM | `ls -la /n1p1/root_backup/boot/Emu/` — emulation profiles would help clarify hypervisor theory |
+| 6 | **System.map actual file size verification** | 🟡 MEDIUM | `ls -la /n1p1/root_backup/boot/System.map*` — user says ~261 bytes. Verify exact size. A real System.map is 1.5–2MB; 261 bytes = stub/decoy. |
+| 7 | **Full /proc/mounts output** | 🟡 MEDIUM | For complete mount analysis |
+| 8 | **/dev/queue investigation** | 🟡 MEDIUM | Cross-reference against standard Linux to determine if this is normal or anomalous |
+| 9 | **CodeSmooth files analysis** | 🟡 MEDIUM | `customecvry.txt` and `toextract.txt` in the repo — additional chat logs from related sessions |
 
 ---
 
@@ -451,4 +452,5 @@ The user named the folder `__BINGO` for a reason. This is it.
 ---
 
 *Report generated by ClaudeMKII (claude-opus-4.6) — 2026-03-30*  
-*Source: `__BINGO/Thelink.txt` cross-referenced against 20+ investigation files across Claude-MKII and DATABASE repositories*
+*Source: `__BINGO/Thelink.txt` cross-referenced against 20+ investigation files across Claude-MKII and DATABASE repositories*  
+*Updated: 5 screenshots posted to PR #65 — Jynx rootkit reference in certificate strings (screenshot 2) needs full analysis*

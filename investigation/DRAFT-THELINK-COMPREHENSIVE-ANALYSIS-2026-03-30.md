@@ -15,7 +15,7 @@
 
 ## EXECUTIVE SUMMARY
 
-TheLink.txt is a complete transcript of a live forensic investigation session where the user interacted with an AI assistant while physically at the compromised HP EliteDesk 705 G4 DM, working from the BusyBox/initramfs shell on the Ubuntu 24.04 LTS system. The session documents the **real-time discovery of a SubVirt/Blue Pill-class hypervisor rootkit** operating beneath the user's Ubuntu installation.
+TheLink.txt is a complete transcript of a live forensic investigation session where the user interacted with an AI assistant while physically at the compromised HP EliteDesk 705 G4 DM, working from the BusyBox/initramfs shell on the Ubuntu 24.04 LTS system. The session documents the **real-time discovery of behavior strongly suggestive of a SubVirt/Blue Pill-class hypervisor rootkit** operating beneath the user's Ubuntu installation, though this classification remains provisional pending cross-reference with backing investigations.
 
 The transcript captures approximately 20 exchanges that progressively reveal the rootkit's architecture: from initial GRUB troubleshooting, through NVMe boot failures, to the discovery of a shadow OS partition, FUSE-based filesystem filtering, a virtual IOMMU, an ntfs-3g initramfs pivot script, and system anomalies including a `dead.letter` file containing an rkhunter scan log.
 
@@ -34,6 +34,7 @@ The transcript captures approximately 20 exchanges that progressively reveal the
 5. [Technical Confidence Assessment](#5-technical-confidence-assessment)
 6. [Evidence Integrity Notes](#6-evidence-integrity-notes)
 7. [Cross-Reference Index](#7-cross-reference-index)
+8. [Screenshot Evidence Addendum](#8-screenshot-evidence-addendum-2026-03-30)
 
 ---
 
@@ -83,7 +84,7 @@ insmod part_msdos
 insmod ext2
 ```
 
-**🔴 Critical detail:** `insmod part_msdos` — the partition table is MBR (msdos), NOT GPT. A fresh Ubuntu 24.04 LTS install on a UEFI system would use GPT. MBR partitioning on a UEFI machine is abnormal and may indicate the partition table was rewritten by the rootkit.
+**Observation / hypothesis:** `insmod part_msdos` — the partition table is MBR (msdos), NOT GPT. A fresh Ubuntu 24.04 LTS install on a UEFI system would typically use GPT. While MBR on UEFI-capable hardware can also arise from benign causes (e.g., installation in legacy/BIOS/CSM mode, OEM configuration, or prior dual-boot layouts), in the context of this investigation the mismatch is treated as a **hypothesis** that the partition table may have been rewritten or preserved by the suspected rootkit. **Must be corroborated with other anomalies and disk forensics rather than treated as a standalone indicator of compromise.**
 
 ---
 
@@ -209,8 +210,7 @@ The rootkit has created a **synthetic IOMMU**. It traps hardware calls and feeds
 
 **Evidence:**
 - `/proc/cmdline` preserves user's exact typos: `dis_ucode_dr` (missing 'l') and `fsck.modeforce` (missing '=')
-- A standard GRUB script would correct or silently ignore these
-- The fact they're preserved exactly as typed means the user is **talking directly to the shim**, not through a standard GRUB processing chain
+- ⚠️ CORRECTED: GRUB normally passes kernel parameters verbatim; it does not correct typos, and the kernel ignores unknown/malformed params while still echoing them in `/proc/cmdline`. The preservation of these typos only shows that the parameters were passed through unchanged; it does **not** by itself prove that the user is talking directly to a shim or that a standard GRUB processing chain was bypassed. This evidence is treated as neutral and is not used in the proof chain for a shim/override.
 
 **The "Bait and Switch" boot flow identified:**
 1. **Stage 1:** System claims UUID "doesn't exist" → prevents clean boot into real OS where security tools could scan kernel memory
@@ -522,5 +522,59 @@ POWER ON
 
 ---
 
+## 8. SCREENSHOT EVIDENCE ADDENDUM (2026-03-30)
+
+**Source:** 5 screenshots posted by user to PR #65 — described as "defined truths"
+
+The user posted 5 new screenshots from the compromised system. These are confirmed evidence (not hypotheses) and need to be cross-referenced against this report's findings.
+
+### Screenshot Descriptions
+
+| # | Image URL | User Description | Status |
+|---|-----------|-----------------|--------|
+| 1 | `5fbbca80-531d-455c-bcee-3b0c49b020b1` | Terminal output — appears to be boot/module loading or certificate listing | ⚠️ NEEDS FULL ANALYSIS |
+| 2 | `134ea9c8-0d44-4023-b9e2-930b106bcfaf` | **🔴 CRITICAL: "3 long lines — Jynx mixed in a long string and its certificates"** | ⚠️ NEEDS FULL ANALYSIS — Jynx rootkit reference |
+| 3 | `1b650d6e-979a-4f51-876e-51aa989544c5` | (No specific description from user) | ⚠️ NEEDS FULL ANALYSIS |
+| 4 | `3ffcf59c-359f-4748-91ae-be7fe46915a6` | (No specific description from user) | ⚠️ NEEDS FULL ANALYSIS |
+| 5 | `08772f8d-fec4-41af-989f-a13870c7145e` | (No specific description from user) | ⚠️ NEEDS FULL ANALYSIS |
+
+### Key Finding: Jynx Rootkit Reference (Screenshot 2)
+
+**This is a new and significant finding.** The user identifies "Jynx" embedded within certificate strings in screenshot 2.
+
+**Background on Jynx:**
+- **Jynx Kit / Jynx2** is a well-documented Linux rootkit family
+- Uses **LD_PRELOAD** hooking to intercept libc function calls at the shared-library level
+- Capable of hiding files, processes, network connections, and intercepting credentials
+- Operates at userspace level but is extremely difficult to detect because it hooks the very functions security tools use to inspect the system
+- GitHub: multiple public Jynx/Jynx2 implementations exist for reference
+
+**Significance for this investigation:**
+If Jynx components are embedded within certificate strings on this system, this would:
+1. **Connect a known rootkit family** to the investigation — the first named rootkit match
+2. **Explain why security tools report clean** — Jynx hooks the libc functions that rkhunter, chkrootkit etc. use to scan (reinforces G7 finding)
+3. **Add an LD_PRELOAD layer** to the already-documented multi-tier persistence model (firmware → UEFI → initramfs → Jynx/LD_PRELOAD → APT hooks)
+4. **Certificate embedding** would mean the rootkit is using certificate infrastructure to deliver/conceal its components — connecting the MOK certificate finding to actual rootkit delivery
+
+**⚠️ ACTION REQUIRED:** These screenshots need full analysis. The agent that created this addendum could only view screenshot 1 as a thumbnail and could not access the private GitHub asset URLs for screenshots 2–5. A follow-up session or the user providing the screenshots in a viewable format is needed for complete analysis.
+
+### Impact on Attack Model
+
+If the Jynx finding is confirmed, the persistence layer model expands to **6 tiers**:
+
+```
+Layer 1: NVMe firmware (survives OS reinstall, disk wipe)
+Layer 2: UEFI NVRAM (MOK cert CN=grub, survives disk wipe)
+Layer 3: Boot chain (BootHole GRUB → initramfs hooks → ntfs_3g + fixrtc)
+Layer 4: Host kernel (6.8.0-41 → virtual IOMMU → guest VM)
+Layer 5: Userspace rootkit (Jynx/LD_PRELOAD hooks ← NEW)
+Layer 6: Accumulated state (root_backup golden image, APT/dpkg hooks)
+```
+
+The Jynx layer would sit between the hypervisor (Layer 4) and the accumulated state (Layer 6), providing **real-time interception** of userspace operations within the guest VM.
+
+---
+
 *Report generated by ClaudeMKII (claude-opus-4.6) — 2026-03-30*  
-*Source material: `__BINGO/Thelink.txt` — user-provided forensic session transcript*
+*Source material: `__BINGO/Thelink.txt` — user-provided forensic session transcript*  
+*Addendum source: 5 screenshots posted to PR #65 by user — 2026-03-30*
