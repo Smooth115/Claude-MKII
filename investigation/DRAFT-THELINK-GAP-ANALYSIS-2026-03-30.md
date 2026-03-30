@@ -19,7 +19,11 @@ Throughout all of this, we had **pieces** — powerful individual findings that 
 
 **TheLink.txt fills most major gaps.** It is the live forensic transcript that shows the rootkit **in operation**, being investigated layer by layer from a BusyBox shell. It connects the Windows evidence to the Linux evidence to the firmware evidence into a more coherent attack architecture.
 
-> ⚠️ DRAFT NOTE: After user review, 9 of 12 gaps are closed. Gaps G6 (C2 communication — /dev/queue is only a candidate with inferential purpose), G10 (attacker fingerprint) and G12 (active exfiltration) remain partially open. Several findings from the initial analysis were corrected: yoink.txt is the user's file, /dev/nmen1p3 was OCR error, dead.letter contains rkhunter log, and the 256MB reference is about EFI MMIO range not System.map. **NEW:** 5 screenshots posted 2026-03-30 — screenshot 2 shows Jynx rootkit name in certificate strings (needs full analysis). All findings need cross-referencing against backing investigations before this document can be a source of truth.
+> ⚠️ DRAFT NOTE: After user review, 9 of 12 gaps are closed. Gaps G6 (C2 communication — /dev/queue is only a candidate with inferential purpose), G10 (attacker fingerprint) and G12 (active exfiltration) remain partially open. Several findings from the initial analysis were corrected: yoink.txt is the user's file, /dev/nmen1p3 was OCR error, dead.letter contains rkhunter log, and the 256MB reference is about EFI MMIO range not System.map.
+>
+> **UPDATE 2026-03-30 (FollowTxt.txt + 59 images added):** FollowTxt.txt is the continuation session that goes deeper into runtime persistence. It closes 3 additional gaps: **G7** (runtime persistence — eBPF injection into PID 1), **G8** (tool evasion — show_fdinfo hooks), **G9** (cross-kernel module loading — mfd_aaeon from 6.17 on 6.8). Also establishes a **6th persistence tier** (eBPF runtime) in the attack model. 59 images and 2 videos provide photographic evidence. Full catalog at `investigation/BINGO-EVIDENCE-CATALOG-2026-03-30.md`.
+>
+> All findings still need cross-referencing against backing investigations before this document can be a source of truth.
 
 This report maps every gap that existed before TheLink.txt, and shows how the new evidence addresses each one.
 
