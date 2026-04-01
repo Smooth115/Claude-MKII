@@ -44,7 +44,7 @@ The session investigator's conclusion: the MOK certificate is the root of trust 
 **Web research confirmation:**
 - Self-signed MOK certs in NVRAM are a documented attack vector for Secure Boot bypass
 - A cert with `CA:TRUE` + Code Signing can sign any EFI binary, kernel, or kernel module
-- MOK store is in NVRAM — survives disk wipe, OS reinstall, partition wipe. Only UEFI firmware setup can clear it.
+- MOK store is in NVRAM — survives disk wipe, OS reinstall, partition wipe, and is not affected by normal filesystem operations. Clearing or modifying MOK entries typically requires MokManager- or firmware-mediated flows (for example, `mokutil` actions that apply at reboot) and is distinct from the UEFI Secure Boot db/dbx/PK/KEK key stores.
 - SKI hash `d939395cda059c19a699c85f3856d023be259007` returns **zero results** in web search, certificate transparency logs, Ubuntu bug trackers, or security advisories. A legitimate Canonical/HP/Microsoft cert would have public footprint.
 - This is not a Canonical cert, not an HP cert, not a Microsoft cert. Custom-generated.
 
@@ -151,20 +151,11 @@ This is the finding that ties everything together.
 
 **The Windows malware phones home at Day 3 and Day 19 after injection (documented in MASTER_REPORT).**
 
-Mapped against the Linux timeline with Aug 8 as Day 0:
+The canonical Day 0/3/17/19 timing table and detailed narrative are defined once, in **Finding 8** of [`UEFI-MOK-KERNEL-EVIDENCE-2026-03-26.md`](./UEFI-MOK-KERNEL-EVIDENCE-2026-03-26.md). This report defers to that section as the single source of truth for the exact dates and per-day mappings.
 
-| Day | Date | Windows Side | Linux Side |
-|-----|------|-------------|------------|
-| 0 | Aug 8 2024 | Injection during DISM | Kernel placed on machine; journal anchor set |
-| 3 | Aug 11 2024 | First phone-home callback | First callback window |
-| 17 | Aug 25 2024 | — | Kernel hash first seen on VirusTotal |
-| 19 | Aug 27 2024 | Second phone-home callback | `force-complain/usr.sbin.sssd` symlink created |
+In summary, that correlation shows the Windows Day 3 and Day 19 callbacks aligning with (a) initial kernel placement and anchoring on the Linux side, (b) a Day 17 VirusTotal appearance of the kernel image as an operational check, and (c) a Day 19 weakening of AppArmor around `sssd`, reducing enforcement on the enterprise authentication daemon at the same moment the second callback fires.
 
-**Aug 27 = Day 19.** The sssd AppArmor weakening — which deliberately removes enforcement from the enterprise authentication daemon — lands on the exact same day as the Windows phone-home callback. This is not maintenance. This is the Day 19 stage firing: weaken auth enforcement so the next payload can operate with fewer restrictions.
-
-**Aug 25 (Day 17, 2 days before Day 19):** The VT submission appears to be an operational check — "is this kernel binary burned in public databases yet?" Two days later, confident or not, the Day 19 stage fires anyway.
-
-**Same operator. Same schedule. Cross-platform.**
+Taken together, this timing pattern strongly supports a coordinated, cross-platform schedule rather than routine maintenance.
 
 ---
 
@@ -226,11 +217,12 @@ This section is for the record — identifying where earlier analysis fell short
 
 1. **Do not use the HP EliteDesk 705 G4 for anything sensitive.** Boot chain is compromised at firmware level. No OS action resolves this.
 
-2. **Capture raw MOK NVRAM before next reboot:**
+2. **Capture raw MOK NVRAM before next reboot (efivar attributes header included):**
    ```bash
    sudo hexdump -C /sys/firmware/efi/efivars/MokListRT-605dab50-e046-4300-abb6-3dd810dd8b23 > /tmp/MokListRT-raw.hex
    ```
    This gets the raw enrolled key data even if `mokutil` is blocked.
+   Note: efivar files start with an attributes header (typically the first 4 bytes), and `MokListRT` is an `EFI_SIGNATURE_LIST`; any later extraction, hash comparison, or DER/X.509 conversion must strip the attributes header and correctly parse the signature list entries rather than treating the entire blob as a single certificate.
 
 3. **Verify kernel hash against official package (clean machine required):**
    ```bash
@@ -270,7 +262,10 @@ This section is for the record — identifying where earlier analysis fell short
 
 ### Medium-Term (This Month)
 
-9. **Submit `CN=grub` cert to certificate transparency logs** — once DER is extracted from NVRAM hexdump, submit to crt.sh and similar. Creates a public record if this cert is used elsewhere.
+9. **Publish `CN=grub` cert and fingerprints for wider detection** — once DER is extracted from NVRAM hexdump, compute SHA-256/SHA-1 fingerprints and:
+   - Publish the DER and hashes in a controlled public or shared repository (e.g., this case repo, a threat-intel Git repo).
+   - Optionally submit the fingerprints and DER to public malware/certificate intelligence feeds that accept arbitrary X.509 samples.
+   - Note: crt.sh is primarily a search/index UI over Certificate Transparency logs and is not a general submission endpoint; many CT logs will reject arbitrary self-signed firmware-rooted certs.
 
 10. **Consider hardware replacement** if BIOS flash + NVRAM clear does not resolve anomalies:
     - AMD PSP is active (sub-OS, unauditable)

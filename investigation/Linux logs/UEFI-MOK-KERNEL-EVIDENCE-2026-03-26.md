@@ -307,7 +307,7 @@ From the Windows investigation (MASTER_REPORT), the attacker's malware phones ho
 | Day | Windows Side (MASTER_REPORT) | Linux Side (This Session) |
 |-----|------------------------------|---------------------------|
 | **Day 0** (Aug 8 2024) | Injection during DISM phase | Kernel placed on machine; journal anchored to Aug 8 |
-| **Day 3** (Aug 11 2024) | First phone-home callback | First callback window |
+| **Day 3** (Aug 11 2024) | First phone-home callback | Inferred first callback window (no direct Linux artifact; aligned to Windows Day 3 callback) |
 | **Day 17** (Aug 25 2024) | — | Kernel hash first appears on VirusTotal |
 | **Day 19** (Aug 27 2024) | Second phone-home callback | `force-complain/usr.sbin.sssd` symlink created — AppArmor enforcement on enterprise auth deliberately weakened |
 
@@ -317,12 +317,12 @@ From the Windows investigation (MASTER_REPORT), the attacker's malware phones ho
 
 2. **Aug 25 (Day 17)** — VirusTotal first-seen for the kernel hash arrives 2 days before the Day 19 callback fires. Either the VT submission was an attacker check ("is this binary burned yet?") or their own scanning infrastructure picked it up before executing the sssd stage.
 
-3. **Same cadence, cross-platform** — identical timing patterns on Windows and Linux confirm a single operator running one operation across two OS targets, using the `CN=grub` MOK certificate as the firmware-level bridge between both boot chains.
+3. **Same cadence, cross-platform** — the closely aligned timing patterns on Windows and Linux are most parsimoniously explained by a single operator running one coordinated operation across two OS targets, using the `CN=grub` MOK certificate as the firmware-level bridge between both boot chains.
 
-**Why this matters:**
-- This is not coincidence — the probability of two independent events landing on exactly Day 3 and Day 19 across both platforms by chance is negligible.
-- It confirms the Windows investigation (DISM/Synergy, PushButtonReset hijack, MIG UIDs) and the Linux investigation (MOK cert, kernel swapping, AppArmor weakening) are outputs of **one operation**.
-- The operator who was physically or remotely present during Windows DISM deployment also enrolled the `CN=grub` cert and laid the Aug 8 Linux groundwork at the same time or in the same access window.
+**Why this matters (inference and assumptions):**
+- The repeated pattern of a **Day 3** initial activity and a **Day 19** follow-up, observed on both Windows and Linux, is unlikely to be a purely random alignment of independent administrative events, given the shared host, overlapping tooling, and reuse of the same `CN=grub` MOK certificate. This is an analytical judgment based on temporal correlation and shared infrastructure, not on a formal probabilistic model.
+- Under this interpretation, the Windows investigation (DISM/Synergy, PushButtonReset hijack, MIG UIDs) and the Linux investigation (MOK cert, kernel swapping, AppArmor weakening) are best viewed as outputs of a **single coordinated operation**, rather than independent compromises, although strictly independent but coincident activity cannot be completely ruled out.
+- We therefore infer that the operator who was physically or remotely present during Windows DISM deployment is very likely the same party who enrolled the `CN=grub` cert and laid the Aug 8 Linux groundwork within the same general access window, subject to the caveat that alternative explanations (for example, a later actor reusing pre-existing artifacts) have not been exhaustively excluded.
 
 ---
 
