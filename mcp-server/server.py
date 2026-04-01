@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Claude-MK2.5 MCP Server
+Claude-MKII MCP Server
 
 Implements the Model Context Protocol (stdio transport) for VS Code integration.
 Exposes tools for reading project files, listing directories, searching content,
@@ -31,7 +31,7 @@ DOC_DIRS = ["core", "investigation", "evidence", "logs"]
 MAX_SEARCH_RESULTS = 200
 SEPARATOR_LENGTH = 60
 
-mcp = FastMCP("Claude-MK2.5")
+mcp = FastMCP("Claude-MKII")
 
 
 # ---------------------------------------------------------------------------
@@ -213,7 +213,7 @@ def project_status() -> str:
         A human-readable overview of the project.
     """
     lines = [
-        f"# Claude-MK2.5 Project Status",
+        f"# Claude-MKII Project Status",
         f"Generated: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
         f"Root: {PROJECT_ROOT}",
         "",
