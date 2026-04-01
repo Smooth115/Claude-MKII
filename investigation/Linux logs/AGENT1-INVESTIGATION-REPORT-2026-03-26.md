@@ -270,7 +270,7 @@ Per `UEFI-MOK-KERNEL-EVIDENCE-2026-03-26.md`: SKI `d939395cda059c19a699c85f3856d
    
    **After running:** copy the raw file to home before rebooting:
    ```bash
-   cp /tmp/MokListRT.raw /home/lloyd/MokListRT.raw
+   cp /tmp/MokListRT.raw $HOME/MokListRT.raw
    ```
    This bypasses `mokutil` entirely and reveals all enrolled MOK keys and their full certificates.
 
@@ -278,43 +278,43 @@ Per `UEFI-MOK-KERNEL-EVIDENCE-2026-03-26.md`: SKI `d939395cda059c19a699c85f3856d
 
    **Step A — quick readable text scan:**
    ```bash
-   strings /home/lloyd/MokListRT.raw
+   strings $HOME/MokListRT.raw
    ```
    This will immediately print any readable strings in the file — Subject, Issuer, CN=grub, serial number, etc.
 
    **Step B — extract the full X.509 cert details:**
    ```bash
-   dd if=/home/lloyd/MokListRT.raw bs=1 skip=48 2>/dev/null | openssl x509 -inform DER -text -noout
+   dd if=$HOME/MokListRT.raw bs=1 skip=48 2>/dev/null | openssl x509 -inform DER -text -noout
    ```
    The EFI variable layout is: 4 bytes attributes + 16 bytes signature type GUID + 4 bytes list size + 4 bytes header size + 4 bytes sig size = 32 bytes header, then 16 bytes owner GUID = 48 bytes total to skip before the DER cert starts. If this shows `unable to load certificate`, try:
    ```bash
-   dd if=/home/lloyd/MokListRT.raw bs=1 skip=32 2>/dev/null | openssl x509 -inform DER -text -noout
+   dd if=$HOME/MokListRT.raw bs=1 skip=32 2>/dev/null | openssl x509 -inform DER -text -noout
    ```
    (Some implementations omit the 16-byte owner GUID.)
 
    **Step C — save the cert as PEM for later submission:**
    ```bash
-   dd if=/home/lloyd/MokListRT.raw bs=1 skip=48 2>/dev/null | openssl x509 -inform DER -out /home/lloyd/mokcert.pem && cat /home/lloyd/mokcert.pem
+   dd if=$HOME/MokListRT.raw bs=1 skip=48 2>/dev/null | openssl x509 -inform DER -out $HOME/mokcert.pem && cat $HOME/mokcert.pem
    ```
    The `cat` at the end prints the base64 PEM block — photograph/transcribe this for CT log submission later.
 
    **Step D — count how many certs are enrolled (total key count):**
    ```bash
-   hexdump -C /home/lloyd/MokListRT.raw | grep -c "30 82"
+   hexdump -C $HOME/MokListRT.raw | grep -c "30 82"
    ```
    `30 82` is the ASN.1 DER sequence header for certs. Count = number of enrolled MOK certificates.
 
 3. **Export CN=grub cert as DER:**
    ```bash
-   # If openssl extraction above worked, grub.pem is already at /home/lloyd/mokcert.pem
+   # If openssl extraction above worked, grub.pem is already at $HOME/mokcert.pem
    # To convert back to DER for reference:
-   openssl x509 -in /home/lloyd/mokcert.pem -outform DER -out /home/lloyd/mokcert.der
+   openssl x509 -in $HOME/mokcert.pem -outform DER -out $HOME/mokcert.der
    ```
    For submission to CT logs and independent analysis.
 
 3. **Dump DSDT:**
    ```bash
-   sudo acpidump -b -o /tmp/acpidump.dat
+   sudo acpidump -b -n DSDT -o /tmp/dsdt.dat
    iasl -d /tmp/dsdt.dat
    ```
    Required to analyze non-standard I/O port claims at `0x0680–0x06ff`, `0x077a`, and WMI method definitions for `WQ22`.
@@ -340,15 +340,22 @@ Per `UEFI-MOK-KERNEL-EVIDENCE-2026-03-26.md`: SKI `d939395cda059c19a699c85f3856d
 
 6. **Verify GRUB hash on clean machine:**
    ```bash
-   apt-get download shim-signed grub-efi-amd64-signed
-   # Extract grubx64.efi and compare against:
-   # 076ceb4824b4bc71e898aaf10cefb738f4eb15efc5e6e951c150c1a265a47d36
+   # On clean Ubuntu 24.04 machine:
+   apt-get download grub-efi-amd64-signed
+
+   # Extract the signed GRUB EFI binary that is installed as
+   # /boot/efi/EFI/ubuntu/grubx64.efi on the system:
+   dpkg-deb -x grub-efi-amd64-signed_*.deb /tmp/grub_pkg
+
+   # Hash the signed binary inside the package:
+   sha256sum /tmp/grub_pkg/usr/lib/grub/x86_64-efi-signed/grubx64.efi.signed
+   # Compare against: 076ceb4824b4bc71e898aaf10cefb738f4eb15efc5e6e951c150c1a265a47d36
    ```
 
-7. **Submit CN=grub SHA1 fingerprint to CT logs:**
+7. **Search CT / certificate datasets using CN=grub SHA1 fingerprint:**
    - `54:f4:18:74:f4:d8:84:28:09:bc:be:88:10:65:92:0a:17:56:5d:25`
-   - Check `https://crt.sh/?q=54F41874F4D8842809BCBE88106592​0A17565D25`
-   - Check `https://search.censys.io/` (SHA1 fingerprint search)
+   - Check `https://crt.sh/?q=54F41874F4D8842809BCBE881065920A17565D25` (search by SHA1 fingerprint)
+   - Check `https://search.censys.io/` (search by SHA1 fingerprint in certificate datasets)
 
 ### Tier 3 — Remediation (If Retaining Hardware)
 
