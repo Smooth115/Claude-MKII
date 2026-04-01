@@ -1,9 +1,9 @@
-# Claude-MK2.5 Docker Image
+# Claude-MKII Docker Image
 #
 # Provides a containerised environment for the MCP server and CLI tool.
 # The project directory is expected to be mounted at /project at runtime.
 #
-# Build:  docker build -t claude-mk2.5 .
+# Build:  docker build -t claude-mkii .
 # Run:    docker-compose up
 
 FROM python:3.11-slim
