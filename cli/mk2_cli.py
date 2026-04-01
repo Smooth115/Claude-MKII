@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Claude-MK2.5 CLI Tool (mk2)
+Claude-MKII CLI Tool (mk2)
 
 Provides a command-line interface for common project operations.
 
@@ -108,7 +108,7 @@ def cmd_serve(_args: argparse.Namespace) -> None:
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
         prog="mk2",
-        description="Claude-MK2.5 CLI — interact with the project from the command line.",
+        description="Claude-MKII CLI — interact with the project from the command line.",
     )
     subparsers = parser.add_subparsers(dest="command", metavar="<command>")
 

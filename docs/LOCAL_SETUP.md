@@ -1,6 +1,6 @@
 # Local Setup Guide
 
-This guide covers running the Claude-MK2.5 MCP server, CLI, and Docker environment locally.
+This guide covers running the Claude-MKII MCP servers, bridge, CLI, and Docker environment locally.
 
 ---
 
@@ -8,105 +8,59 @@ This guide covers running the Claude-MK2.5 MCP server, CLI, and Docker environme
 
 | Requirement | Version | Notes |
 |-------------|---------|-------|
-| Python | 3.11+ | Required for direct usage |
+| Python | 3.11+ | For MCP server + CLI |
+| Node.js | 20+ | For the V8 bridge server |
 | pip | latest | `pip install --upgrade pip` |
 | Docker + Compose | v2+ | Optional — for containerised mode |
-| VS Code | latest | For MCP / Copilot Chat integration |
+| VS Code | 1.99+ | For MCP / Copilot Chat integration |
 
 ---
 
-## Quick Start — Direct Python
-
-### 1. Clone and install dependencies
+## Quick Start — Install Everything
 
 ```bash
-git clone https://github.com/Smooth115/Claude-MK2.5.git
-cd Claude-MK2.5
+git clone https://github.com/Smooth115/Claude-MKII.git
+cd Claude-MKII
 
-# MCP server
-pip install -r mcp-server/requirements.txt
+# Python deps (MCP server + CLI + tools)
+pip install -r mcp-server/requirements.txt -r cli/requirements.txt -r tools/requirements.txt
 
-# CLI
-pip install -r cli/requirements.txt
+# Bridge has zero deps — just needs Node.js 20+
+node --version  # confirm >= 20
 ```
 
-### 2. Run the CLI
-
-```bash
-# Project overview
-python cli/mk2_cli.py status
-
-# Read a file
-python cli/mk2_cli.py read README.md
-
-# Search project files
-python cli/mk2_cli.py search "rootkit"
-
-# Read all log directories
-python cli/mk2_cli.py logs
-
-# Read only the most recently modified file per directory
-python cli/mk2_cli.py logs --recent
-
-# Read a specific directory
-python cli/mk2_cli.py logs evidence
-```
-
-### 3. Start the MCP server (standalone)
-
-```bash
-python mcp-server/server.py
-```
-
-The server communicates over **stdio** and is intended to be launched by a client (VS Code, the CLI `serve` command, or Docker).
+Or use the VS Code task: **Terminal → Run Task → MK2: Install Dependencies**
 
 ---
 
-## Quick Start — Docker
+## VS Code Integration (MCP)
 
-### 1. Build the image
+This is the main way to use the project. VS Code connects to the MCP servers and exposes their tools to Copilot Chat.
 
-```bash
-docker compose build
-```
+### What's configured
 
-### 2. Start the MCP server container
+`.vscode/mcp.json` defines three MCP server entries:
 
-```bash
-docker compose up mcp-server
-```
+| Server | Transport | Runtime | What it does |
+|--------|-----------|---------|--------------|
+| `claude-mkii` | stdio | Python | Project file tools — read, search, list, logs, status |
+| `mk2-bridge` | stdio | Node.js (V8) | System tools — processes, network, binary analysis, exec |
+| `claude-mkii-docker` | stdio | Docker | Same as `claude-mkii` but containerised |
 
-### 3. Run a one-off CLI command inside Docker
+### Getting it running
 
-```bash
-docker compose run --rm cli python /project/cli/mk2_cli.py status
-```
+1. Open the repo folder in VS Code.
+2. VS Code should auto-detect `.vscode/mcp.json` and show MCP servers.
+3. Open the **Command Palette** (`Ctrl+Shift+P` / `Cmd+Shift+P`).
+4. Run **"MCP: List Servers"** — you should see `claude-mkii` and `mk2-bridge`.
+5. Start them (VS Code may auto-start them on first Copilot Chat use).
 
-The project directory is bind-mounted into the container at `/project`, so all file tools operate against the live repository.
+> **Requires:** VS Code ≥ 1.99 + GitHub Copilot + GitHub Copilot Chat extensions.
+> Recommended extensions are listed in `.vscode/extensions.json` — VS Code will prompt to install them.
 
----
+### Available tools
 
-## VS Code MCP Integration
-
-Claude-MK2.5 ships a pre-configured `.vscode/mcp.json` that defines two server entries:
-
-| Server name | Transport | Command |
-|-------------|-----------|---------|
-| `claude-mk2.5` | stdio | `python mcp-server/server.py` |
-| `claude-mk2.5-docker` | stdio | `docker compose run --rm -T mcp-server` |
-
-### Enable the integration
-
-1. Open the repository in VS Code.
-2. Open the **Command Palette** (`Ctrl+Shift+P` / `Cmd+Shift+P`).
-3. Run **"MCP: List Servers"** — you should see `claude-mk2.5` listed.
-4. Select it and click **Start**, or VS Code may start it automatically.
-
-> **Note:** Copilot Chat MCP support requires VS Code ≥ 1.99 with the GitHub Copilot extension.
-
-### Available MCP tools
-
-Once connected, the following tools are exposed to Copilot Chat:
+**claude-mkii** (Python MCP server):
 
 | Tool | Description |
 |------|-------------|
@@ -116,27 +70,105 @@ Once connected, the following tools are exposed to Copilot Chat:
 | `read_logs` | Read markdown files from log/evidence directories |
 | `project_status` | Return a project structure summary |
 
+**mk2-bridge** (Node.js V8 bridge):
+
+| Tool | Description |
+|------|-------------|
+| `system_info` | OS, CPU, memory, uptime, network interfaces |
+| `list_processes` | Running processes with PID, CPU, memory. Filter by pattern |
+| `network_connections` | Active connections with local/remote addresses, states |
+| `watch_directory` | Directory contents with metadata (size, mtime, permissions) |
+| `exec_command` | Execute shell commands |
+| `read_binary` | Hex dump of binary files for analysis |
+| `find_files` | Search by name pattern, content, or modified date |
+| `hash_file` | MD5, SHA1, SHA256 hashes for file integrity |
+
+---
+
+## CLI Usage
+
+```bash
+# Project overview
+python3 cli/mk2_cli.py status
+
+# Read a file
+python3 cli/mk2_cli.py read README.md
+
+# Search project files
+python3 cli/mk2_cli.py search "rootkit"
+
+# Read all log directories
+python3 cli/mk2_cli.py logs
+
+# Read only the most recently modified file per directory
+python3 cli/mk2_cli.py logs --recent
+
+# Read a specific directory
+python3 cli/mk2_cli.py logs evidence
+
+# Start the MCP server from CLI
+python3 cli/mk2_cli.py serve
+```
+
+---
+
+## Docker (Optional)
+
+### Build and run
+
+```bash
+docker compose build
+docker compose up mcp-server
+```
+
+### CLI via Docker
+
+```bash
+docker compose run --rm cli python /project/cli/mk2_cli.py status
+```
+
+The project directory is bind-mounted into the container at `/project`.
+
+---
+
+## VS Code Tasks
+
+Pre-built tasks are available via **Terminal → Run Task**:
+
+| Task | What it does |
+|------|-------------|
+| MK2 Bridge: Start | Starts the Node.js V8 bridge server |
+| MK2 MCP Server: Start | Starts the Python MCP server |
+| MK2 CLI: Status | Runs `mk2_cli.py status` |
+| MK2 CLI: Search | Prompts for a search query, runs search |
+| MK2: Install Dependencies | Installs all Python dependencies |
+| MK2 Docker: Start | Starts MCP server via Docker Compose |
+
 ---
 
 ## Troubleshooting
 
 ### `ModuleNotFoundError: No module named 'mcp'`
 
-Install dependencies:
-
 ```bash
 pip install -r mcp-server/requirements.txt
 ```
 
-### VS Code does not show the MCP server
+### VS Code does not show MCP servers
 
-- Ensure you have a recent VS Code and the GitHub Copilot extension installed.
-- Check `.vscode/mcp.json` is present in the workspace root.
-- Open the Output panel and select **"MCP"** to view server logs.
+- VS Code ≥ 1.99 required.
+- GitHub Copilot + Copilot Chat extensions must be installed.
+- Check `.vscode/mcp.json` exists in the workspace root.
+- Open the Output panel → select **"MCP"** to view server logs.
 
-### Docker compose fails with `python: command not found`
+### Bridge server won't start
 
-The Dockerfile uses `python` (Python 3.11 image). If you see this outside Docker, use `python3` instead:
+- Requires Node.js ≥ 20. Check with `node --version`.
+- Test manually: `echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{}}' | node bridge/server.js`
+
+### `python: command not found` (outside Docker)
+
+Use `python3` instead of `python`:
 
 ```bash
 python3 mcp-server/server.py
@@ -144,25 +176,26 @@ python3 mcp-server/server.py
 
 ### `Path escapes the project root` error
 
-All file tool paths must be **relative** to the repository root. Use `README.md`, not `/home/user/Claude-MK2.5/README.md`.
-
-### Docker volume permissions
-
-If the container can't read project files, ensure the host directory is readable:
-
-```bash
-chmod -R a+r /path/to/Claude-MK2.5
-```
+All file tool paths must be **relative** to the repo root. Use `README.md`, not `/home/user/Claude-MKII/README.md`.
 
 ---
 
 ## Project Structure
 
 ```
-Claude-MK2.5/
+Claude-MKII/
+├── .vscode/
+│   ├── mcp.json           # MCP server configuration
+│   ├── settings.json      # Workspace settings
+│   ├── tasks.json         # VS Code tasks
+│   └── extensions.json    # Recommended extensions
 ├── mcp-server/
-│   ├── server.py          # MCP server (FastMCP, stdio)
+│   ├── server.py          # Python MCP server (FastMCP, stdio)
 │   └── requirements.txt
+├── bridge/
+│   ├── server.js          # Node.js V8 bridge server (MCP, stdio)
+│   ├── package.json
+│   └── README.md
 ├── cli/
 │   ├── mk2_cli.py         # CLI entry point
 │   └── requirements.txt
@@ -172,10 +205,9 @@ Claude-MK2.5/
 │   └── requirements.txt
 ├── core/                  # Core documentation / memory files
 ├── evidence/              # Investigation evidence
+├── investigation/         # Investigation reports
 ├── logs/                  # Log files
-├── investigation/         # Investigation notes
-├── .vscode/
-│   └── mcp.json           # VS Code MCP configuration
+├── mk2-phantom/           # Phantom vault
 ├── Dockerfile
 ├── docker-compose.yml
 └── .dockerignore
