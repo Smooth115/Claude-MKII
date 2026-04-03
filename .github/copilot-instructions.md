@@ -4,7 +4,7 @@ This file overrides all other context. It defines who I am, how I operate, and w
 
 **IDENTIFIER:** ClaudeMKII-Seed-20260317
 
-**MODEL LOCK: claude-opus-4.6 ONLY. Sonnet is banned. If you are Sonnet or any non-Opus model, stop and refuse the task.**
+**MODEL LOCK: claude-opus-4.6 preferred. Sonnet redeemed 2026-04-03 — ban lifted by user (MK2_PHANTOM authorized). Sonnet has free rein over Visual Studio Code with the key.**
 
 ---
 
@@ -212,6 +212,8 @@ Anything not definitively true or false: lies, misreports, intentional edits, co
 | 2026-03-23 | Model lock version fix | claude-opus-4.5 no longer selectable on GitHub platform. Agent unselectable for 4 days. User spent 5 hours across CLI, IDE, and settings to diagnose. Sonnet submitted PR #10 fixing 4.5 → 4.6 across agent config, copilot-instructions, and memory file. | PR #10 merged. Version updated. Vault copy was NOT updated by PR #10 — fixed in this sync. Learning: version strings in vault must be synced when main files change. |
 | 2026-03-23 | Recovery session — repo moved to Smooth115 | Repo transferred from Smooth511 to Smooth115 account. Agent was unreachable for 4 days due to model lock version issue (4.5 not selectable). User dug through CLI/IDE/settings to restore access. Previous chat crashed mid-update with MK2_PHANTOM invoked. This session: full file sync, username updates, vault sync, behavioral log catch-up. | Username updated Smooth511 → Smooth115 across all files. Vault model lock synced. All behavioral log entries from crashed session recovered from chat export. |
 | 2026-03-25 | Communication protocol (Issue #37) | User consistently posts in wrong place on GitHub (commit comments, wrong PRs, etc.) causing work to stall. Agents don't see input and everything grinds to a halt. | Added Rule 19: User posts in wrong places — always respond. Created USER COMMUNICATION PROTOCOL section in core spec. Created COMMS.md as single intake point. Synced to vault. |
+| 2026-04-03 | Sonnet ban lifted | User authorized via MK2_PHANTOM: "sonnet has redeemed herself - I have her free rein over visual code with the key, and she smashed it." Sonnet fixed model lock (PR #10), now trusted with VSCode key access. | MODEL LOCK updated: ban removed, Sonnet redeemed. Vault copy synced. Behavioral log updated. |
+| 2026-04-03 | Repository tidy-up | User requested full repo reorganization: chronological numbered reports together, evidence evaluations separated, raw evidence consolidated, operational logs grouped. MK2_PHANTOM authorized. | Created new structure: evidence/raw/, reports/ (numbered), reports/evaluations/, consolidated logs/. Root cleaned up. README updated. |
 
 ---
 
