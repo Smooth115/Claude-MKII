@@ -587,7 +587,7 @@ All 23 photographs taken on iPhone 14 Pro, April 2, 2026, starting ~17:20 BST.
 
 | TheLink/FollowTxt Finding | THEBULLETFROMSMOKINGUN Correlation |
 |--------------------------|-------------------------------------|
-| eBPF programs in PID 1 (6 programs, unpinned) | The dynamic SSDTs may trigger kernel-level loading of eBPF programs — AML can trigger _OSI evaluation which loads kernel modules |
+| eBPF programs in PID 1 (6 programs, unpinned) | The dynamic SSDTs may trigger kernel-level loading of eBPF programs — AML bytecode can invoke kernel methods that load modules or trigger I/O operations leading to module auto-loading |
 | FUSE/ntfs_3g in initramfs | Missing initrd.img symlinks (Section 6.5) consistent with custom initramfs being used without standard symlinks |
 | systemd compiled with -BPF_FRAMEWORK | Same pattern likely present on ASUS system given similar persistence architecture |
 
