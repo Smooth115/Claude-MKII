@@ -6,7 +6,7 @@
 **Key:** ClaudeMKII-Seed-20260317 | MK2_PHANTOM  
 **Date:** 2026-04-02  
 **Classification:** CRITICAL 🔴 — Firmware-level rootkit persistence CONFIRMED on second system  
-**Status:** ESCALATION — Rootkit proven to operate from ACPI/UEFI/SMM layer, not just OS-level  
+**Status:** ESCALATION — Strong evidence of rootkit operating from ACPI/UEFI/SMM layer; full confirmation pending payload extraction  
 **System:** ASUS PRIME B460M-A (Intel i7-10700, Comet Lake)  
 **Kernel:** 6.17.0-14-generic (HWE)
 
@@ -50,18 +50,19 @@
 
 ### What Was Found
 
-On April 2, 2026, the user conducted a live forensic investigation of the **ASUS PRIME B460M-A** system (the "secondary" system referenced in the Comprehensive Rootkit Report). Using a Live USB environment and AI-guided investigation, the user documented **firmware-level rootkit persistence** through direct evidence of:
+On April 2, 2026, the user conducted a live forensic investigation of the **ASUS PRIME B460M-A** system (the "secondary" system referenced in the Comprehensive Rootkit Report). Using a Live USB environment and AI-guided investigation, the user documented **evidence strongly suggestive of firmware-level rootkit persistence** through:
 
-1. **WPBT (Windows Platform Binary Table)** in ACPI firmware — a BIOS mechanism that force-injects executables into any booting OS
+1. **WPBT (Windows Platform Binary Table)** present in ACPI firmware — a BIOS mechanism capable of providing executables to booting operating systems (auto-executed on Windows; exposed but not auto-executed on Linux)
 2. **13 SSDTs (Secondary System Description Tables)** — 6 static (firmware-resident) + 7 dynamically injected at runtime — where a normal system has 3-4 total
-3. **CpuSmm and WpBufAddr EFI variables** — proving System Management Mode persistence and a physical memory staging address for the injected binary
-4. **Active defense mechanism** — system crashed/froze when the user attempted to access or delete the EFI variables, consistent with SMM watchdog behavior
+3. **CpuSmm and WpBufAddr EFI variables** — names consistent with System Management Mode functionality and WPBT buffer staging (variable contents not captured before crash)
+4. **Active defense behavior** — system crashed/froze when the user attempted to access EFI variables, consistent with firmware-level tamper-response
 5. **Remmina remote access tool** symbols compiled into system binaries, with SSH tunnel capability
 6. **Kernel tainted with proprietary (non-standard) module** — confirmed by `Tainted: P` in kernel logs
+7. **Direct `/dev/mem` access demonstrated** — user successfully dumped raw ACPI table bytes (FPDT) from physical memory, establishing the methodology for future WPBT payload extraction
 
 ### Why This Matters
 
-The previous investigation (Comprehensive Report, Apr 1) established a **7-tier attack model** spanning NVMe firmware through userspace. This evidence package **closes the gap** between "probable firmware persistence" and "confirmed firmware persistence" on the ASUS system specifically. The WPBT + dynamic SSDT injection + SMM variables constitute direct, photographed evidence that the rootkit operates **below the OS**, **below the bootloader**, at the ACPI/UEFI/SMM layer.
+The previous investigation (Comprehensive Report, Apr 1) established a **7-tier attack model** spanning NVMe firmware through userspace. This evidence package **significantly narrows the gap** between "probable firmware persistence" and "confirmed firmware persistence" on the ASUS system specifically. The WPBT presence + 13 SSDTs (7 dynamic) + suspicious EFI variables + crash-on-access behavior constitute strong structural evidence of firmware-level compromise. Full confirmation requires extracting the WPBT payload and EFI variable contents (methodology now demonstrated via `/dev/mem`).
 
 This is the "bullet from the smoking gun" — the gun was the behavioral evidence accumulated over months; the bullet is the structural proof from the ACPI tables.
 
@@ -69,10 +70,10 @@ This is the "bullet from the smoking gun" — the gun was the behavioral evidenc
 
 | Previous Status | New Status |
 |----------------|------------|
-| Firmware persistence *suspected* on ASUS system | Firmware persistence **confirmed** via WPBT + dynamic SSDTs |
-| SMM involvement *theoretical* | SMM **confirmed** via CpuSmm EFI variable |
-| BIOS binary injection *hypothesized* | BIOS binary injection **confirmed** via WpBufAddr staging address |
-| Active defense *behavioral observation* | Active defense **confirmed** — system crash on EFI variable access |
+| Firmware persistence *suspected* on ASUS system | Firmware persistence **strongly indicated** — WPBT present + 13 SSDTs (7 dynamic) + suspicious EFI variables |
+| SMM involvement *theoretical* | SMM involvement **supported** — CpuSmm EFI variable observed (contents not yet captured) |
+| BIOS binary injection *hypothesized* | BIOS binary injection mechanism **present** — WPBT table in firmware; payload extraction methodology demonstrated via `/dev/mem` |
+| Active defense *behavioral observation* | Active defense **consistent with observation** — system freeze on EFI variable access; exact trigger not isolated |
 
 ---
 
@@ -109,7 +110,7 @@ The user ran `sudo ls -lR /sys/firmware/acpi/tables` and photographed the output
 | **WPBT** | WPBT | **60** | **Windows Platform Binary Table** | **🔴 SMOKING GUN — BIOS binary injector** |
 | WSMT | WSMT | 40 | Windows SMM Security Mitigations | Normal — but ironic given the SMM abuse |
 
-**Timestamp:** All tables show `Apr 2 18:39` (UTC) — the time the tables were loaded into `/sys/firmware/acpi/tables` during this boot session.
+**Observed sysfs timestamp:** All tables show `Apr 2 18:39` — this is the sysfs pseudo-file mtime reported by the kernel when the entries were created in `/sys/firmware/acpi/tables`, not necessarily the exact time each table was loaded by firmware. (See also: timestamp manipulation findings — system-provided times on this machine are unreliable.)
 
 ### Dynamic Tables (`/sys/firmware/acpi/tables/dynamic/`)
 
@@ -131,13 +132,13 @@ These tables were **injected at runtime**, NOT loaded from firmware ROM. They ex
 
 **This system has 13 SSDTs.** 6 in static firmware, 7 dynamically injected at runtime.
 
-**Total dynamic SSDT payload:** ~11,431 bytes of AML (ACPI Machine Language) bytecode injected after boot. This is executable code that runs in the ACPI interpreter at Ring 0/SMM privilege.
+**Total dynamic SSDT payload:** ~11,431 bytes of AML (ACPI Machine Language) bytecode injected after boot. This is executable code interpreted by the OS ACPI interpreter in kernel context (Ring 0); it does not itself execute inside SMM.
 
 **SSDT5 at 14,142 bytes** is the largest single table — a normal SSDT for CPU P-states is typically 500-2,000 bytes. 14KB of AML is enough to implement a complete hardware interaction framework including:
 - Device hiding/showing based on boot state
 - PCI topology remapping (consistent with NVMe PCI rotation finding)
 - MMIO range manipulation (consistent with 256MB EFI MMIO finding)
-- SMI (System Management Interrupt) triggers for SMM persistence
+- I/O operations that may trigger SMIs (System Management Interrupts), which would invoke separate SMM handlers
 
 ### The `/sys/firmware/acpi/tables/data/` directory
 
@@ -149,13 +150,30 @@ Line 165 shows: `total 0` — empty. This is normal for the `data/` directory, b
 
 ### What WPBT Is
 
-The **Windows Platform Binary Table** is an ACPI table (defined by Microsoft) that allows firmware to provide an executable to the operating system for automatic execution during boot. Originally designed for anti-theft software (like Computrace/LoJack), it contains:
+The **Windows Platform Binary Table** is an ACPI table (defined by Microsoft) that allows firmware to provide an executable to the operating system during boot. Originally designed for anti-theft software (like Computrace/LoJack), it contains:
 
 - A physical memory address pointing to a PE (Portable Executable) binary
 - The binary's size
 - Execution flags
 
-The OS is expected to copy the binary from the BIOS-specified memory location and execute it with SYSTEM privileges. Despite the name, Linux kernels since ~5.x can parse WPBT, and the HWE 6.17 kernel on this system has ACPI debugging enabled (the chatlog confirms `acpidbg` is present but `acpidump` is not — line 1015-1016).
+**Windows behavior:** Windows' WPBT consumer logic automatically copies and executes the referenced binary with SYSTEM privileges. This is the designed use case.
+
+**Linux behavior:** Standard Linux kernels expose the WPBT table via `/sys/firmware/acpi/tables/WPBT` but do **not** automatically execute the referenced PE binary. However, the table's presence means: (a) the firmware has staged a binary in physical memory at the address specified in the WPBT header, and (b) any code with physical memory access (including kernel modules, SMM handlers, or initramfs scripts) can read and use that staged binary. The HWE 6.17 kernel on this system has ACPI debugging enabled (the chatlog confirms `acpidbg` is present but `acpidump` is not — line 1015-1016).
+
+**User-demonstrated `/dev/mem` access (Apr 2-3, 2026):** The user demonstrated direct physical memory access to ACPI tables by dumping the FPDT table via:
+```
+dmesg | grep -i fpdt
+# → ACPI: FPDT 0x00000000B81ED000 000044 (v01 ALASKA A M I  01072009 AMI 01000013)
+# → ACPI: Reserving FPDT table memory at [mem 0x8b1ed000-0x8b1ed043]
+
+sudo dd if=/dev/mem bs=1 skip=$((0x8b1ed000)) count=68 2>/dev/null | hexdump -C
+# → 00000000  46 50 44 54 44 00 00 00  01 36 41 4c 41 53 4b 41  |FPDTD....6ALASKA|
+# → 00000010  41 20 4d 20 49 20 00 00  09 20 07 01 41 4d 49 20  |A M I ......AMI |
+# → 00000020  13 00 00 01 00 00 10 01  00 00 00 00 00 d0 d4 6c  |...............l|
+# → 00000030  00 00 00 00 01 00 10 01  00 00 00 00 00 d0 c8 6c  |...............l|
+# → 00000040  00 00 00 00                                        |....|
+```
+This confirms: (a) ASUS ALASKA/AMI BIOS firmware, (b) the same `/dev/mem` technique can extract the WPBT table contents and the binary payload it references, (c) root shell access from initramfs/recovery mode is available.
 
 ### Evidence
 
@@ -172,11 +190,16 @@ WPBT means the firmware can inject a binary into **any OS** that boots on this h
 
 ### Verification Needed
 
-The raw WPBT binary content was not extracted before the system froze. The user attempted:
-```
-sudo cat /sys/firmware/acpi/tables/WPBT > /home/ubuntu/wpbt_binary.bin
-```
-but the system crashed during EFI variable examination (see Section 9). A future session should prioritize extracting this binary FIRST, before touching any EFI variables.
+The raw WPBT binary content was not extracted before the system froze. Note: `/sys/firmware/acpi/tables/WPBT` contains only the WPBT ACPI table header (60 bytes), which includes the physical memory address and size of the actual binary payload. To extract the payload itself, the procedure is:
+
+1. Dump the WPBT table header: `sudo cat /sys/firmware/acpi/tables/WPBT | hexdump -C`
+2. Parse the physical address and length fields from the header
+3. Use `/dev/mem` to read the actual binary from the referenced physical address:
+   ```
+   sudo dd if=/dev/mem bs=1 skip=$((PHYSICAL_ADDR)) count=PAYLOAD_SIZE 2>/dev/null > wpbt_payload.bin
+   ```
+
+The user has demonstrated this `/dev/mem` technique works on this system (see FPDT dump above). A future session should prioritize extracting the WPBT table header and its referenced payload FIRST, before touching any EFI variables.
 
 ---
 
@@ -186,11 +209,11 @@ but the system crashed during EFI variable examination (see Section 9). A future
 
 Static ACPI tables (in `/sys/firmware/acpi/tables/`) are loaded from firmware ROM during early boot. They're set by the BIOS manufacturer.
 
-Dynamic ACPI tables (in `/sys/firmware/acpi/tables/dynamic/`) are **loaded after boot** via one of these mechanisms:
-1. **ACPI _OSI method** — firmware checks which OS is running and loads additional tables
-2. **Custom ACPI method calls** — a DSDT or SSDT method dynamically loads another table
-3. **`acpi_load_table()` kernel call** — something with kernel access loads a table at runtime
-4. **configfs/debugfs** — on kernels with ACPI debug support (this kernel has `acpidbg`), tables can be loaded through debug interfaces
+Dynamic ACPI tables (in `/sys/firmware/acpi/tables/dynamic/`) can appear after boot through a mix of **firmware/AML conditional behavior** and **actual runtime table installation**:
+1. **ACPI `_OSI` checks** — firmware/AML checks which OS is being claimed and may conditionally expose devices, methods, or code paths; `_OSI` itself does **not** load a table
+2. **AML `Load()` or equivalent custom ACPI method paths** — a DSDT or SSDT method can dynamically install another table at runtime
+3. **`acpi_load_table()` kernel call** — something with kernel access installs a table at runtime
+4. **configfs/debugfs** — on kernels with ACPI debug support (this kernel has `acpidbg`), tables can also be installed through debug interfaces
 
 **7 tables being dynamically loaded is not normal.** On a stock ASUS B460M-A, you might see 0-1 dynamic tables (typically for hot-plugged PCIe devices). Seven dynamic SSDTs containing 11,431 bytes of AML bytecode is evidence of a systematic runtime ACPI framework being deployed after boot.
 
@@ -219,32 +242,45 @@ The user enumerated EFI variables via `/sys/firmware/efi/vars/` and found:
 
 | Variable | GUID (partial) | Assessment |
 |----------|----------------|------------|
-| **CpuSmm** | `90d93e09-...` | **🔴 Confirms System Management Mode persistence.** SMM is Ring -2 — below the OS, below the hypervisor. SMM code survives warm reboots. |
-| **WpBufAddr** | `cba83c4a-...` | **🔴 Physical memory address for WPBT binary staging.** This is where the rootkit's loader sits in RAM, ready for injection into any booting OS. |
-| **EnWpData** | (associated) | WPBT enable/data variable — controls whether the WPBT injection is active |
-| **NVRAM_Verify** | (found in list) | **Suspicious** — not standard on ASUS boards. Likely the rootkit's own integrity check for its EFI variable set. If you delete a variable, this one detects the tampering. |
+| **CpuSmm** | `90d93e09-...` | **Suspicious — name is consistent with possible System Management Mode-related functionality.** SMM is Ring -2 — below the OS, below the hypervisor. Variable name alone does not confirm SMM persistence; confirmation requires variable attributes/value analysis and/or firmware module reference. However, the name combined with the crash behavior (below) and WPBT presence is strongly suggestive. |
+| **WpBufAddr** | `cba83c4a-...` | **Suspicious — name is consistent with a possible buffer address used by WPBT-related staging.** Confirmation would require dumping the variable payload and correlating the address with the WPBT table's physical address field. |
+| **EnWpData** | (associated) | **Suspicious — name is consistent with a possible WPBT enable/data variable**, but without attributes/value contents its function cannot be confirmed. |
+| **NVRAM_Verify** | (found in list) | **Suspicious** — not standard on ASUS boards. Could represent an integrity-check or validation variable, but would need payload or firmware-reference confirmation. |
 | **MyFav** | `4034591c-...` | **Suspicious** — generic name, not a standard ASUS variable. Possible obfuscated payload or configuration. |
 | **BiosEventLog** | (found in list) | Could be standard, but in this context may serve as rootkit heartbeat/activity logging. |
-| **MemoryOverwriteRequestControlLock** | (found in list) | Standard Secure Boot variable — but the rootkit is leveraging it to prevent RAM clearing, which would destroy the WpBufAddr payload. |
+| **MemoryOverwriteRequestControlLock** | (found in list) | Standard Secure Boot variable. If malicious firmware is present, it could potentially be leveraged to interfere with RAM-clearing behavior, but that linkage is not proven from the variable name alone. |
 
 ### The Crash
 
-When the user accessed these EFI variables (specifically around `flashrom` investigation), the system **immediately froze**. This is consistent with:
+When the user accessed these EFI variables (specifically around `flashrom` investigation), the system **immediately froze**. This is consistent with, but does not by itself prove:
 
-1. **SMM watchdog** — SMM code monitors access patterns to EFI variables. When it detected enumeration/modification attempts targeting CpuSmm/WpBufAddr, it triggered a System Management Interrupt (SMI) that halted the CPU.
-2. **MemoryOverwriteRequestControlLock** — attempting to modify this variable triggers a platform reset as a Secure Boot defense, which the rootkit exploits as a self-defense mechanism.
+1. **SMM watchdog or other firmware-level defensive logic** — firmware-resident code may monitor access patterns to sensitive EFI variables. The freeze is consistent with enumeration/modification attempts hitting protected variables including the suspicious CpuSmm/WpBufAddr entries, but the exact trigger path was not directly verified.
+2. **Platform protection behavior involving MemoryOverwriteRequestControlLock or related Secure Boot variables** — attempting to modify such variables can trigger a reset or halt on some platforms. If malicious firmware is present, it could piggyback on that behavior as self-defense, but this mechanism is not conclusively demonstrated by the observation alone.
 
 The user pulled the USB at this point (line 1175) — the software battle was over for that session.
 
 ### Significance
 
-**CpuSmm + WpBufAddr together prove a complete firmware persistence chain:**
-1. WPBT table in firmware points to WpBufAddr (physical memory location)
-2. SMM code (referenced by CpuSmm) manages the injection process
-3. On every boot, SMM code copies the binary from WpBufAddr into OS memory space
-4. If anyone tries to interfere with the variables, SMM crashes the system
+**CpuSmm + WpBufAddr do not, by themselves, prove the full persistence mechanism; they support a firmware-level persistence hypothesis that fits the observed behavior.**
 
-This is **not** OS-level persistence. This is **not** bootloader persistence. This is **CPU microarchitecture-level persistence** operating in the most privileged execution mode available on x86.
+**Verified evidence from this session:**
+1. WPBT table is present in firmware/ACPI inventory (60 bytes in `/sys/firmware/acpi/tables/`).
+2. EFI variables with names `CpuSmm` and `WpBufAddr` were observed during investigation.
+3. The system froze when the user accessed the relevant EFI-variable area during `flashrom`-adjacent investigation.
+4. User has demonstrated `/dev/mem` physical memory access to ACPI tables (FPDT dump confirmed working).
+
+**Inference / working hypothesis (not yet directly confirmed):**
+1. WPBT may reference a payload buffer associated with WpBufAddr.
+2. SMM-resident code may use that buffer as part of a persistence or reinjection path.
+3. The freeze on access may be a defensive SMM/firmware response rather than a normal platform stability issue.
+
+**Evidence required to confirm each step:**
+1. **WPBT → buffer linkage:** extract the WPBT table fields showing payload address/length (via `/dev/mem` dump of the 60-byte header) and recover the referenced payload from physical memory.
+2. **WpBufAddr variable meaning/value:** capture the EFI variable contents before freeze and verify that the value matches a relevant physical address or buffer descriptor.
+3. **CpuSmm → SMM execution role:** recover and analyze the responsible firmware/SMM module, or obtain runtime traces showing SMI/SMM activity tied to these variables.
+4. **Crash-on-access behavior:** obtain memory forensics, SMM instrumentation, or firmware debug evidence showing the freeze being triggered by variable access.
+
+Based on the currently verified evidence, the strongest defensible conclusion is: **the system shows high-confidence signs of firmware-level persistence or tamper-response behavior, but the exact WPBT/WpBufAddr/SMM causal chain remains an inference pending direct extraction of the payload, EFI variable values, and SMM module evidence.**
 
 ---
 
@@ -452,17 +488,16 @@ The kernel's security check for Writeable+Executable memory pages **passed**. Th
 
 ### 9.3 ACPI Driver Version 20250404
 
-The ACPI subsystem reported driver version `20250404`. Combined with the BIOS date of `12/10/2025` on this ASUS board, the ACPI stack is using a very recent (or future-dated) revision. This is consistent with modified firmware.
+The ACPI subsystem reported driver version `20250404`. That value is best interpreted as the kernel's ACPICA/ACPI subsystem version indicator (baked into the compiled kernel), not the motherboard firmware build or BIOS revision. By itself, it does not support a conclusion that the firmware was modified.
 
 ### 9.4 The Final Crash
 
-When the user attempted to enumerate and potentially delete EFI variables (specifically searching for `flashrom` references and finding CpuSmm/WpBufAddr), the system **froze completely**. This is the SMM watchdog in action:
+When the user attempted to enumerate and potentially delete EFI variables (specifically searching for `flashrom` references and finding CpuSmm/WpBufAddr), the system **froze completely**. The freeze is consistent with firmware-level defensive behavior, though the exact mechanism was not directly verified:
 
 1. User reads from `/sys/firmware/efi/vars/`
-2. EFI variable access triggers a System Management Interrupt (SMI)
-3. SMM handler (referenced by CpuSmm variable) detects unauthorized enumeration pattern
-4. SMM handler issues a platform halt/reset to protect its variables
-5. System becomes unresponsive — not a kernel panic (no crash dump), but a CPU halt initiated from Ring -2
+2. EFI variable access may trigger firmware-level protection logic (SMM handler, Secure Boot protection, or platform stability mechanism)
+3. System becomes unresponsive — not a kernel panic (no crash dump), suggesting a halt or reset initiated below OS level
+4. The specific trigger path (whether CpuSmm/WpBufAddr access, MemoryOverwriteRequestControlLock, or another variable triggered the freeze) was not isolated
 
 The user pulled the USB and powered off.
 
@@ -562,8 +597,8 @@ All 23 photographs taken on iPhone 14 Pro, April 2, 2026, starting ~17:20 BST.
 | Kernel | 6.17.0-19-generic | 6.17.0-14-generic |
 | ACPI debug | Unknown | `acpidbg` present, `acpidump` absent |
 | WPBT | Not investigated | **Confirmed present** |
-| SMM vars | Not investigated | **CpuSmm + WpBufAddr confirmed** |
-| Dynamic SSDTs | Not investigated | **7 runtime-injected SSDTs confirmed** |
+| SMM vars | Not investigated | **CpuSmm + WpBufAddr EFI variables observed** (contents not captured) |
+| Dynamic SSDTs | Not investigated | **7 runtime-injected SSDTs confirmed in /sys/firmware/acpi/tables/dynamic/** |
 
 ---
 
@@ -583,7 +618,7 @@ All 23 photographs taken on iPhone 14 Pro, April 2, 2026, starting ~17:20 BST.
 
 | Tier | Layer | Evidence Source | New? |
 |------|-------|----------------|------|
-| **0** | **ACPI/SMM — Ring -2 persistence** | **WPBT, CpuSmm, WpBufAddr, 13 SSDTs, dynamic injection, SMM watchdog crash** | **🆕 YES** |
+| **0** | **ACPI/SMM — Ring -2 persistence (hypothesis)** | **WPBT present, CpuSmm/WpBufAddr EFI vars observed, 13 SSDTs (7 dynamic), system freeze on EFI var access — full SMM causal chain pending payload extraction** | **🆕 YES** |
 | 1 | NVMe firmware | PCI rotation, drive hiding | |
 | 2 | UEFI NVRAM | MOK certificate CN=grub, NVRAM_Verify variable | Updated |
 | 3 | Shadow host kernel (hypervisor) | TheLink.txt, virtual IOMMU, FUSE pivot | |
@@ -592,13 +627,15 @@ All 23 photographs taken on iPhone 14 Pro, April 2, 2026, starting ~17:20 BST.
 | 6 | Runtime eBPF | PID 1 injection, sd_devices programs | |
 | 7 | Userspace RAT | Remmina symbols, SSH tunnels, Python AsyncGenerator C2, systemd generators/scopes | Updated |
 
-**Tier 0 is new.** It sits BELOW the previous lowest tier (NVMe firmware) because SMM executes at a higher privilege than any software — including firmware update routines. SMM code runs in a protected memory region (SMRAM) that is invisible to the OS, the hypervisor, and even UEFI runtime services.
+**Tier 0 is new (working hypothesis).** If the CpuSmm/WpBufAddr variables are confirmed to be functional SMM persistence components (pending payload extraction), this tier sits BELOW the previous lowest tier (NVMe firmware) because SMM executes at a higher privilege than any software — including firmware update routines. SMM code runs in a protected memory region (SMRAM) that is invisible to the OS, the hypervisor, and even UEFI runtime services. The WPBT table presence and crash-on-access behavior strongly support this tier but direct confirmation awaits payload and variable value extraction.
 
-### The Full Kill Chain (Boot Sequence)
+### The Full Kill Chain (Boot Sequence) — Working Hypothesis
+
+> **Note:** This kill chain integrates verified evidence with inferred mechanisms. Steps marked with (†) are inferences not yet directly confirmed.
 
 ```
-1. Power on → CPU enters SMM → CpuSmm code activates
-2. SMM loads WPBT binary from WpBufAddr into protected memory
+1. Power on → CPU enters SMM → CpuSmm-related code may activate (†)
+2. WPBT mechanism stages binary at WpBufAddr address (†)
 3. BIOS POST → Static SSDTs (1-6) define base hardware topology
 4. UEFI boot → MOK certificate validates rootkit's bootloader/kernel
 5. GRUB → Loads shadow host kernel (6.8.0-41) OR guest kernel
@@ -607,7 +644,7 @@ All 23 photographs taken on iPhone 14 Pro, April 2, 2026, starting ~17:20 BST.
 8. systemd boots → Generators create transient persistence units
 9. eBPF programs injected into PID 1 → Tool evasion layer active
 10. Remmina/Python C2 launches → Remote access operational
-11. WPBT injects binary into OS → Backup persistence if any layer fails
+11. WPBT may provide backup persistence if OS-level layers fail (†)
 ```
 
 ---
@@ -619,10 +656,10 @@ All 23 photographs taken on iPhone 14 Pro, April 2, 2026, starting ~17:20 BST.
 | Gap | Description | Status | Evidence |
 |-----|-------------|--------|----------|
 | **G6** (partial) | C2 communication mechanism | **PARTIALLY CLOSED** — Remmina SSH tunnel + Python AsyncGenerator identified as C2 channel | IMG_1337, chatlog lines 673-700 |
-| **G7** | Security tools report clean | **CLOSED** — W+X check passes because rootkit properly separates W and X pages; SMM code is invisible to all OS-level tools | Chatlog line 998 |
+| **G7** | Security tools report clean | **PARTIALLY CLOSED** — W+X check result is consistent with W^X compliance at the time of inspection, but by itself does not prove all tools "report clean" or that all rootkit components are invisible to OS-level tools | Chatlog line 998 |
 | **G8** | Windows↔Linux bridge | **CLOSED** — WPBT is literally a Windows-defined ACPI table being used to inject into Linux; MOK cert controls both OS boot chains | WPBT table in ACPI listing |
-| **NEW** | Firmware persistence mechanism | **CLOSED** — WPBT + CpuSmm + WpBufAddr + 7 dynamic SSDTs | GUESSwhatsINhere.txt, chatlog lines 1055-1170 |
-| **NEW** | Active defense mechanism | **CLOSED** — SMM watchdog crashes system when EFI variables accessed | Chatlog lines 1140-1170, system freeze |
+| **NEW** | Firmware persistence mechanism | **PARTIALLY CLOSED** — WPBT table confirmed present; CpuSmm/WpBufAddr EFI variables observed; 7 dynamic SSDTs confirmed. Full causal chain (WPBT→SMM→injection) remains inference pending payload extraction. | GUESSwhatsINhere.txt, chatlog lines 1055-1170 |
+| **NEW** | Active defense mechanism | **PARTIALLY CLOSED** — System froze on EFI variable access, consistent with firmware-level defense; exact trigger mechanism not isolated | Chatlog lines 1140-1170, system freeze |
 
 ### Gaps Still Open
 
@@ -630,7 +667,7 @@ All 23 photographs taken on iPhone 14 Pro, April 2, 2026, starting ~17:20 BST.
 |-----|-------------|---------------|
 | **G10** | Attacker fingerprint/attribution | No attribution data in this evidence |
 | **G12** | Active exfiltration proof | Remmina SSH tunnel is the suspected channel but no captured traffic |
-| **NEW** | WPBT binary content | Raw binary not extracted before crash — need to dump `/sys/firmware/acpi/tables/WPBT` in future session BEFORE touching EFI vars |
+| **NEW** | WPBT binary content | Raw binary not extracted before crash — need to: (1) dump WPBT table header via `cat /sys/firmware/acpi/tables/WPBT | hexdump -C`, (2) parse the physical address/length fields, (3) use `/dev/mem` to extract the actual payload binary from physical memory (user has demonstrated this technique with FPDT). Do this BEFORE touching EFI vars. |
 | **NEW** | Individual SSDT decompilation | Need to extract and decompile each of the 13 SSDTs with `iasl` (Intel ACPI compiler) to see exactly what AML operations they perform |
 | **NEW** | acpidbg session | The ACPI debugger is available on this kernel — a controlled session could reveal the rootkit's namespace, methods, and the "ABERNOR" crash source |
 
