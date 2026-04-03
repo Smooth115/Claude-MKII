@@ -88,7 +88,7 @@ The user, working from a Live USB environment, systematically investigated the A
 **Significance:** The `--wait` flag on ghost terminals creates a watchdog — if one terminal is killed, the parent process immediately relaunches. The subiquity process running outside of installation context proves **post-install hooks are being abused for persistence**.
 
 #### Phase 5: Kernel/Memory Warfare (Lines 740–900)
-- **OOM Killer triggered:** User inadvertently constrained rootkit by creating a tiny partition; kernel killed rootkit's grep process (PID 49180) which tried to allocate **12.5GB of virtual memory** (`total-vm: 12517760kB`)
+- **OOM Killer triggered:** User  constrained rootkit by creating a tiny partition; kernel killed rootkit's grep process (PID 49180) which tried to allocate **12.5GB of virtual memory** (`total-vm: 12517760kB`)
 - **Kernel tainted: P (PROPRIETARY_MODULE)** — non-standard kernel module loaded
 - `Code: Unable to access opcode bytes at 0x7ed9c13654d3` — rootkit's execution thread crashed
 - `rtkit-daemon` — rootkit trying to acquire realtime priority to bypass user's commands
