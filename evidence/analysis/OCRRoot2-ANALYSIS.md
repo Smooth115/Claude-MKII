@@ -6,7 +6,8 @@
 **Source:** OCRRoot2.txt (5403 lines, iPhone OCR of terminal screenshots)  
 **System:** ASUS PRIME B460M-A, Ubuntu 26.04 LTS (beta) Live USB via Ventoy  
 **Kernel:** 7.0.0-10-generic (7.0.0-rc4), built Thu Mar 19 10:24:42 UTC 2026  
-**Boot method:** `init=/bin/bash lockdown=none break=top nomodules boot=casper`  
+**Boot method:** `boot.casper nomodules break=top ignore_loglevel init=/bin/bash lockdown=none`  
+**Note:** `boot.casper` (dot notation) — user confirmed `boot=casper` did NOT work, only `boot.casper` did  
 **Session context:** initramfs shell — exploring Ventoy internals and initramfs filesystem  
 **Duplication note:** ~40% duplicated content from scrollback/re-reading. Unique content estimated at ~3200 lines.
 
@@ -24,17 +25,21 @@ The file contains substantial duplication (~40%) from the user scrolling through
 
 ### 2.1 Kernel Command Line
 ```
-BOOT_IMAGE=/casper/vmlinuz boot=casper nomodules break=top ignore_loglevel init=/bin/bash lockdown=none
+BOOT_IMAGE=/casper/vmlinuz boot.casper nomodules break=top ignore_loglevel init=/bin/bash lockdown=none
 ```
+
+Kernel dmesg confirms: `Unknown kernel command line parameters "noprompt boot.casper break-top", will be passed to user space.`
 
 | Parameter | Purpose |
 |-----------|---------|
-| `boot=casper` | Use casper live boot framework |
+| `boot.casper` | Use casper live boot framework — **dot notation required, `boot=casper` did NOT work** |
 | `nomodules` | **Prevent kernel module loading** — blocks OOT modules (taint 4609 source) |
 | `break=top` | **Drop to shell at FIRST opportunity** in initramfs, before any scripts |
 | `ignore_loglevel` | Show all kernel messages regardless of level |
 | `init=/bin/bash` | Replace systemd with bare bash shell |
 | `lockdown=none` | **Disable kernel lockdown** — allow /dev/mem, kprobes, etc. |
+
+**Why `boot.casper` not `boot=casper`:** The user discovered through experimentation that the equals-sign syntax failed but the dot notation worked. The kernel passes `boot.casper` to userspace as an unrecognized parameter. The casper initramfs scripts in `/conf/conf.d/default-boot-to-casper.conf` contain a fallback: `if [ -z "$BOOT" ]; then export BOOT=casper; fi`. The dot notation may bypass whatever mechanism was intercepting the standard `boot=casper` parameter.
 
 ### 2.2 Compiler Chain
 - **GCC:** x86_64-linux-gnu-gcc (Ubuntu 15.2.0-15ubuntu2) 15.2.0

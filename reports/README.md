@@ -28,6 +28,8 @@ Chronologically numbered investigation and analysis reports. Each report synthes
 | 18 | 2026-04-01 | **Comprehensive Rootkit Report** | **MASTER REPORT** — all 12 sources |
 | 19 | 2026-04-02 | THEBULLETFROMSMOKINGUN Report | ASUS investigation report |
 | 20 | 2026-04-02 | THEBULLETFROMSMOKINGUN Analysis | ASUS deep technical analysis |
+| 21 | 2026-04-11 | AICHAT + OCR220 Analysis | AI chat review, OCR220SS, dpkg cross-reference |
+| 22 | 2026-04-11 | **Pre-Overlay Breach** | **Initramfs tactical breach, inwahnrad injection proof, Ventoy boot chain dissection** |
 
 ## Evaluations
 

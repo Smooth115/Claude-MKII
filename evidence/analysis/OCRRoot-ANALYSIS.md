@@ -6,7 +6,8 @@
 **Source:** OCRRoot.txt (2927 lines, iPhone OCR of terminal screenshots)  
 **System:** ASUS PRIME B460M-A, Ubuntu 26.04 LTS (beta) Live USB via Ventoy  
 **Kernel:** 7.0.0-10-generic (7.0.0-rc4), built Thu Mar 19 10:24:42 UTC 2026  
-**Boot method:** `init=/bin/bash lockdown=none break=top nomodules boot=casper`  
+**Boot method:** `boot.casper nomodules break=top ignore_loglevel init=/bin/bash lockdown=none`  
+**Note:** `boot.casper` (dot notation) — user confirmed `boot=casper` did NOT work, only `boot.casper` did  
 **Session context:** root@(none):/ — Pre-overlay root shell, initramfs stage
 
 ---
@@ -63,7 +64,7 @@ EFI    boot.catalog  dists  pool
 
 ### 3.2 Significance
 
-**inwahnrad is NOT in /cdrom when the system is booted with `break=top nomodules`.**
+**inwahnrad is NOT in /cdrom when the system is booted with `break=top nomodules boot.casper`.**
 
 In Report 21 (OCR220SS analysis), `inwahnrad` was documented as present in `/cdrom` during a normal live desktop boot:
 ```
