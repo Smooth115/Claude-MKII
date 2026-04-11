@@ -25,7 +25,7 @@ The OCR quality is moderate — typical for iPhone OCR of terminal output. Dupli
 ### 2.1 Hardware Detected at Boot
 - **NVMe:** 0000:04:00.0 (Samsung SM981/PM981/PM983) — matches previous evidence
 - **USB Mouse:** 30FA:0400 (USB Optical Mouse) on usb-0000:00:14.0-7
-- **USB Keyboard:** 1A2C:4894 (SEMICO USB Keyboard) on usb-0000:00:14.0-8
+- **USB Keyboard:** 1A2C:4894 (SEMICO USB Keyboard) on usb-0000:00:14.0-8 — elsewhere in the evidence set (including OCRRoot2) this appears as `1A2C:4094`; `4894` is likely an OCR digit flip, so both variants should be considered during cross-report correlation
 - **USB Drive:** Kingston DataTraveler 3.0, sda (121077760 × 512-byte = 62.0 GB), sda1 + sda2
 - **TSC calibration:** 2903.999 MHz — Intel Comet Lake confirmed
 

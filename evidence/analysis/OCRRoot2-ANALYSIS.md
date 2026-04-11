@@ -30,6 +30,8 @@ BOOT_IMAGE=/casper/vmlinuz boot.casper nomodules break=top ignore_loglevel init=
 
 Kernel dmesg confirms: `Unknown kernel command line parameters "noprompt boot.casper break-top", will be passed to user space.`
 
+**Normalization note:** The quoted dmesg/raw OCR evidence contains transcription artifacts (`break-top`, and elsewhere `init/bin/bash`). Throughout this analysis, these are normalized to the intended parameter forms: `break=top` and `init=/bin/bash`.
+
 | Parameter | Purpose |
 |-----------|---------|
 | `boot.casper` | Use casper live boot framework — **dot notation required, `boot=casper` did NOT work** |

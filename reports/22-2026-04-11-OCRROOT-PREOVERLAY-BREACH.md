@@ -28,7 +28,7 @@
 
 ## 1. Executive Summary
 
-The user executed a deliberate tactical breach of the ASUS B460M-A's boot process, getting ahead of the rootkit by booting with `boot.casper nomodules break=top init=/bin/bash lockdown=none`. This dropped to a root shell at the initramfs stage — BEFORE the casper overlay formed, BEFORE kernel modules loaded, and BEFORE the rootkit's "illusion" could assemble. Two OCR captures document the session.
+The user executed a deliberate tactical breach of the ASUS B460M-A's boot process, getting ahead of the rootkit by booting with `boot.casper nomodules break=top init=/bin/bash lockdown=none ignore_loglevel`. This dropped to a root shell at the initramfs stage — BEFORE the casper overlay formed, BEFORE kernel modules loaded, and BEFORE the rootkit's "illusion" could assemble. In the proven working setup, `ignore_loglevel` was included to preserve verbose early-boot output during the breach. Two OCR captures document the session.
 
 **Three critical findings:**
 
@@ -77,6 +77,8 @@ BOOT_IMAGE=/casper/vmlinuz boot.casper nomodules break=top ignore_loglevel init=
 ```
 Unknown kernel command line parameters "noprompt boot.casper break-top", will be passed to user space.
 ```
+
+**Note:** `break-top` in the quoted line above is an OCR/rendering artifact from the captured terminal output. The intended initramfs argument is `break=top`. Likewise, any similar OCR artifact such as `init/bin/bash` in this report should be read as `init=/bin/bash`.
 
 The kernel doesn't understand `boot.casper` — it passes it to userspace. The casper initramfs scripts have a fallback in `/conf/conf.d/default-boot-to-casper.conf`:
 ```bash
@@ -282,7 +284,7 @@ linear multipath raid0 raid1 raid456 raid5 raid6 raid10 efivarfs
 | 3 | **`live_injection_7ed136ec...` hook framework** | OCRRoot2.txt:907 | Ventoy's injection point — attack vector if hook.sh exists |
 | 4 | **`disk_mount_hook.sh` in mountroot** | OCRRoot2.txt:3771 | This hook constructs the overlay "illusion" |
 | 5 | **`vtoykmod` kernel module tool** | OCRRoot2.txt:187 | Ventoy can load arbitrary kernel modules during boot |
-| 6 | **`vtoy_fuse_iso_64` mediates ISO access** | OCRRoot2.txt:~170 | All ISO file access goes through Ventoy's userspace code |
+| 6 | **`vtoy_fuse_iso_64` mediates ISO access** | OCRRoot2.txt:71,103 | All ISO file access goes through Ventoy's userspace code |
 | 7 | **efivarfs in initramfs modules list** | OCRRoot2.txt:1865 | EFI variables accessible during earliest boot |
 | 8 | **UUID `bedie5ac-c89d-4c5b-bb9c-f9cad3e04b06`** | OCRRoot2.txt:1845 | Initramfs build identifier |
 | 9 | **4-layer initramfs structure** | OCRRoot2.txt:~50-100 | 597+28908+102882+137634 blocks across 4 layers |
