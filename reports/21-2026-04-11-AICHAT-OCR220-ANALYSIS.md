@@ -3,7 +3,7 @@
 **Classification:** EVIDENCE ANALYSIS — AI CHAT VERIFICATION + NEW EVIDENCE  
 **Prepared by:** ClaudeMKII (MK2_PHANTOM)  
 **Report Date:** 2026-04-11  
-**Sources:** AICHAT.txt (1793 lines, AI-only responses), OCR220SS.txt (16969 lines, 220 screenshot OCR)  
+**Sources:** AICHAT.txt (1794 lines, AI-only responses), OCR220SS.txt (16970 lines, 220 screenshot OCR)  
 **System:** ASUS PRIME B460M-A, Ubuntu 26.04 (beta), Kernel 7.0.0-10-generic (7.0.0-rc4)  
 **Date of Activity:** 2026-04-10 (16:40–17:45+)
 
@@ -221,9 +221,9 @@ OCR220SS.txt shows multiple "Send problem report to the developers?" dialogs wit
 
 The installer uses Snap revision 549 of `ubuntu-desktop-bootstrap` tracking channel `26.04/stable`. This is the Ubuntu desktop installer snap.
 
-### 4.7 🆕 linux-tools-7.0.0-10 and python3.14 in /boot Area
+### 4.7 🆕 linux-tools-7.0.0-10 and python3.14 in OCR Listing
 
-OCR220SS.txt line 4981 shows `linux-tools-7.0.0-10` and `python3.14` visible near /boot listings. Python 3.14 is expected for Ubuntu 26.04.
+OCR220SS.txt line 4981 appears to show `linux-tools-7.0.0-10` and `python3.14`, but the surrounding entries (for example `gshadow`, `hosts`, and `NetworkManager`) fit an `/etc`-style listing rather than `/boot`. The earlier `/boot` attribution should therefore be treated as incorrect or potentially mis-OCR'd. Python 3.14 is expected for Ubuntu 26.04.
 
 ### 4.8 🆕 systemd-oomd Active at Boot
 
@@ -247,9 +247,9 @@ SSSD (System Security Services Daemon) failing to start is notable — it handle
 
 ## 5. Section 3: AI Remediation Strategy — Review & Rebuild
 
-### 5.1 The AI's Proposed Strategy (AICHAT.txt lines 1768–1793)
+### 5.1 The AI's Proposed Strategy (AICHAT.txt lines 1768–1793, final available excerpt)
 
-The AI proposed a 6-step attack sequence to be executed from TTY3 immediately on boot:
+The AI proposed a 6-step attack sequence to be executed from TTY3 immediately on boot. However, this cited range runs to the end of `AICHAT.txt`, and the export itself ends at line 1793 mid-sentence with a trailing blank line, so this should be treated as a truncated excerpt rather than a complete section:
 
 | Step | AI's Command | AI's Reasoning |
 |------|-------------|----------------|
@@ -436,9 +436,30 @@ Instead of Synaptic, the effective approach depends on WHICH layer you're target
 **For the apt hook persistence (Tier 4):**
 ```bash
 # From clean live USB, mounting target as /mnt/target:
-rm -f /mnt/target/etc/apt/apt.conf.d/*hook*
-rm -f /mnt/target/etc/initramfs-tools/hooks/*
-rm -f /mnt/target/etc/initramfs-tools/scripts/local-premount/*
+
+# 1) Back up the affected directories before making changes
+backup_root="/mnt/target/root/hook-remediation-backup-$(date +%Y%m%d-%H%M%S)"
+mkdir -p "$backup_root"
+cp -a /mnt/target/etc/apt/apt.conf.d "$backup_root"/
+cp -a /mnt/target/etc/initramfs-tools/hooks "$backup_root"/
+cp -a /mnt/target/etc/initramfs-tools/scripts/local-premount "$backup_root"/
+
+# 2) Review candidate files by suspicious name or content instead of deleting everything
+find /mnt/target/etc/apt/apt.conf.d \
+     /mnt/target/etc/initramfs-tools/hooks \
+     /mnt/target/etc/initramfs-tools/scripts/local-premount \
+     -maxdepth 1 -type f \
+     \( -iname '*hook*' -o -iname '*.bak' -o -iname '*.tmp' -o -iname '*.disabled' \) -print
+
+grep -RIlE '(curl|wget|nc |/dev/tcp|base64|python -c|chmod \+x|chattr|systemctl|initramfs)' \
+     /mnt/target/etc/apt/apt.conf.d \
+     /mnt/target/etc/initramfs-tools/hooks \
+     /mnt/target/etc/initramfs-tools/scripts/local-premount
+
+# 3) After manual review, delete only confirmed suspicious files by exact path, for example:
+# rm -f /mnt/target/etc/apt/apt.conf.d/99-evil-hook
+# rm -f /mnt/target/etc/initramfs-tools/hooks/evil-update
+# rm -f /mnt/target/etc/initramfs-tools/scripts/local-premount/evil-premount
 ```
 
 **For the dpkg state (Tier 5):**
@@ -471,10 +492,11 @@ Based on the cross-referenced evidence and the AI chat analysis, here is the **r
 # Check kernel taint — if non-zero, the kernel is compromised
 cat /proc/sys/kernel/tainted
 
-# Check for hidden PIDs
-ls /proc | grep '^[0-9]' | wc -l
-ps -e --no-headers | wc -l
-# If numbers don't match = hidden processes
+# Check for hidden PIDs (heuristic — use PID diff for confirmation)
+ls /proc | grep '^[0-9]\+$' | sort -n > /tmp/proc-pids.txt
+ps -e -o pid= | tr -d ' ' | sort -n > /tmp/ps-pids.txt
+comm -3 /tmp/proc-pids.txt /tmp/ps-pids.txt
+# A count mismatch is only a heuristic; use the PID diff above before asserting hidden processes
 
 # Check for preload hijack
 cat /etc/ld.so.preload
@@ -527,11 +549,17 @@ systemctl stop polkit 2>/dev/null
 ### Phase 4: Lockdown (Post-Install or Post-Clean)
 
 ```bash
-# Lock critical directories
-chattr +i /usr/bin /usr/sbin /lib/modules
-chattr +i /etc/apt/apt.conf.d
-chattr +i /etc/initramfs-tools/hooks
-chattr +i /etc/sudoers.d
+# Lock specific high-value files only; do NOT make whole directories immutable.
+# Directory immutability does not protect all contents and will interfere with
+# package installs/upgrades/removals and kernel/initramfs maintenance.
+chattr +i /usr/bin/sudo /usr/bin/dpkg /usr/bin/apt
+chattr +i /etc/sudoers
+find /etc/sudoers.d -maxdepth 1 -type f -exec chattr +i {} \;
+
+# Before apt/dpkg operations, kernel updates, initramfs rebuilds, or sudo config changes:
+# chattr -i /usr/bin/sudo /usr/bin/dpkg /usr/bin/apt /etc/sudoers
+# find /etc/sudoers.d -maxdepth 1 -type f -exec chattr -i {} \;
+# After completing the maintenance, re-apply the locks above.
 
 # Verify key binaries
 sha256sum /usr/bin/sudo /usr/bin/dpkg /usr/bin/apt
